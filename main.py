@@ -1,13 +1,5 @@
 """
 Hotel Celosía: app de gestión de reservas y análisis (Streamlit + Oracle).
-
-Ejecución:     streamlit run main.py
-Credenciales:  .streamlit/secrets.toml, sección [oracle]
-    user, password, dsn, config_dir, wallet_password   -> modo thin (sin Instant Client)
-    lib_dir                                            -> opcional, modo thick (Instant Client)
-
-Los cálculos (conteos, sumas, promedios) los hace Oracle con GROUP BY y Python solo recibe
-el resultado. Todas las consultas usan variables bind (:nombre).
 """
 import datetime as dt
 import html
