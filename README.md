@@ -97,32 +97,52 @@ erDiagram
 
 ## Normalización
 
-Las tablas están en **tercera forma normal (3FN)**, con tres decisiones conscientes en la tabla de hechos que se explican al final.
+### ¿Qué es normalizar?
 
-**Primera forma normal (1FN): cada celda guarda un solo valor.**
-- No hay listas dentro de una celda: cada huésped tiene un teléfono, un email y un documento.
-- No hay grupos repetidos: una reserva es **una** habitación. Si una familia toma dos habitaciones, son dos filas.
-- Cada tabla tiene llave primaria.
+Normalizar es organizar las tablas para que **cada dato se guarde en un solo lugar**. Así, si un dato cambia, solo hay que corregirlo una vez, y la base nunca dice dos cosas distintas sobre lo mismo.
 
-**Segunda forma normal (2FN): todo depende de la llave completa.**
-- Todas las llaves primarias son de **una sola columna** (`hd_id_huesped`, `ha_id_habitacion`, `tp_id_temporada`, `re_id_reserva`). Por eso ningún atributo puede depender solo de una parte de la llave.
+Un ejemplo de lo que se evita: si el precio de la habitación 402 se escribiera en cada una de sus reservas, al subir la tarifa habría que cambiarlo en cientos de filas. Si se olvida alguna, la base tendría dos precios distintos para la misma habitación. Por eso el precio vive **solo** en la tabla `habitacion`.
 
-**Tercera forma normal (3FN): los atributos dependen de la llave y de nada más.**
-- El **precio por noche** es de cada habitación y no del tipo: la suite 402 y la suite 602 cuestan distinto. Por eso está en `habitacion`, y no en una tabla de tipos.
-- El **recargo** es de la temporada, y el **país** es del huésped. Ninguno de esos datos se repite en `reserva`: la reserva solo guarda las tres llaves foráneas.
-- El documento, el número de habitación y el nombre de la temporada son **UNIQUE**: son llaves candidatas, no dependencias entre atributos.
+Hay varios niveles de normalización, llamados **formas normales**. Cada uno agrega una regla al anterior. Las tablas de este proyecto cumplen las tres primeras.
 
-**Lo que no se guarda porque se puede calcular:**
-- La **edad** del huésped: cambia cada año, así que se calcula con la fecha de nacimiento.
-- Si una habitación está **libre u ocupada**: depende de la fecha, así que se calcula con las reservas. `ha_estado` solo dice si la habitación está en servicio.
+### Primera forma normal (1FN): una sola cosa por casilla
 
-**Tres decisiones conscientes en `reserva`.** Estos atributos se podrían calcular con otros datos, y en la teoría estricta serían dependencias transitivas. Se guardan a propósito, como es habitual en la tabla de hechos de un modelo estrella:
+**La regla:** en cada casilla de la tabla va un solo dato, nunca una lista.
 
-| Atributo | Se podría calcular con | Por qué se guarda | Cómo se evita que se contradiga |
+**En este proyecto:**
+- Cada huésped tiene **un** teléfono, **un** email y **un** documento. No hay casillas como "300 123 4567, 310 987 6543".
+- Una reserva es **una** habitación. Si una familia toma dos habitaciones, se guardan como dos reservas, en dos filas, y no como "402 y 403" en una misma casilla.
+
+### Segunda forma normal (2FN): cada dato depende de toda la llave
+
+**La regla:** cada dato debe depender de la llave completa de la tabla, y no solo de una parte de ella.
+
+**En este proyecto:** esta regla solo puede romperse cuando la llave de una tabla está formada por **dos o más columnas**. Aquí, todas las llaves son **de una sola columna**: un código para cada huésped, cada habitación, cada temporada y cada reserva. Por eso esta forma se cumple automáticamente.
+
+### Tercera forma normal (3FN): cada dato está en la tabla que le corresponde
+
+**La regla:** un dato debe depender de lo que la tabla describe, y no de otro dato de la misma tabla.
+
+**En este proyecto:**
+- El **precio por noche** está en `habitacion`, porque cada habitación tiene su propio precio: la suite 402 y la suite 602 cuestan distinto.
+- El **recargo** está en `temporada`, porque depende de la época del año.
+- El **país** está en `huesped`, porque es un dato de la persona.
+- La tabla `reserva` **no repite** ninguno de esos datos: solo guarda los códigos que la conectan con el huésped, la habitación y la temporada.
+
+### Lo que no se guarda porque se puede calcular
+
+- **La edad del huésped:** cambia cada año. Se guarda la fecha de nacimiento y la edad se calcula cuando se necesita.
+- **Si una habitación está libre u ocupada:** cambia según la fecha. Se calcula revisando las reservas. La columna `ha_estado` solo dice si la habitación está en servicio o en mantenimiento.
+
+### Tres excepciones hechas a propósito
+
+En `reserva` hay tres datos que se podrían calcular a partir de otros. Una normalización estricta diría que no deberían guardarse, pero aquí se guardan por buenas razones, y es lo habitual en la tabla principal de un modelo estrella:
+
+| Dato | Se podría calcular con | Por qué se guarda de todas formas | Qué evita errores |
 |---|---|---|---|
-| `re_noches` | salida − entrada | Es la medida que usan casi todos los análisis | El CHECK `ck_reserva_noches` exige que coincida con las fechas |
-| `re_valor_total` | precio × noches × recargo | Es lo que se cobró en el momento de reservar. Si la tarifa cambia después, la reserva debe conservar el valor original | Lo calcula la app al reservar o modificar |
-| `re_id_temporada` | la fecha de entrada | Permite unir la reserva con su temporada con una llave foránea, como cualquier dimensión del modelo estrella | Lo asigna la app con la fecha de entrada |
+| `re_noches` | La fecha de salida menos la de entrada | Se usa en casi todos los análisis, y así no hay que calcularlo cada vez | Una regla de la base exige que coincida con las fechas |
+| `re_valor_total` | Precio × noches × recargo | Es lo que se cobró **en el momento de reservar**. Si mañana sube la tarifa, la reserva debe seguir mostrando lo que realmente se pagó | La app lo calcula al reservar o modificar |
+| `re_id_temporada` | La fecha de entrada | Conecta la reserva con su temporada de forma directa | La app lo asigna según la fecha de entrada |
 
 ---
 
