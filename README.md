@@ -180,8 +180,6 @@ confirmada  →  cancelada
 
 - **Una sola puerta a la base de datos.** Solo el archivo `conexion.py` se comunica con Oracle. Las páginas no se conectan por su cuenta: le piden los datos a ese archivo. Así, si algún día cambia la forma de conectarse, se cambia en un solo lugar.
 
-- **Protegido contra ataques.** Lo que el usuario escribe nunca se mezcla con las instrucciones SQL: se envía a Oracle por separado, como un dato. Por ejemplo, si alguien escribe código malicioso en el campo del documento, Oracle lo trata como un número de documento más y no lo ejecuta. Esto protege contra un ataque llamado *inyección SQL*.
-
 - **Los errores no dañan los datos.** Cada vez que se guarda o se cambia algo, la app lo hace en un solo paso: o se guarda todo, o no se guarda nada. Si algo falla en la mitad, todo vuelve a como estaba. Además, cuando Oracle rechaza una operación, la app muestra un mensaje claro, como *"No se puede eliminar: hay reservas que dependen de este registro"*, en lugar de un error técnico.
 
 - **Las contraseñas no están en el código.** El usuario, las contraseñas y la ubicación del wallet se guardan en un archivo aparte, `.streamlit/secrets.toml`, que no se sube a GitHub.
