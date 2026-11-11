@@ -176,12 +176,17 @@ confirmada  →  cancelada
 
 ## Cómo está hecho el código
 
-- **Modular:** cada archivo tiene una sola responsabilidad (conexión, reglas, interfaz) y cada página de la app vive en su propio archivo dentro de `paginas/`.
-- **Conexión centralizada:** solo `conexion.py` habla con Oracle. Crea un pool de conexiones una vez y el resto del código usa sus funciones `consultar()`, `valor()` y `escribir()`.
-- **Consultas parametrizadas:** ninguna consulta se arma pegando texto. Todos los valores viajan como variables bind (`:documento`, `:fecha`…), así que la app no es vulnerable a inyección SQL. Los filtros opcionales también son variables bind: si están vacíos se envían como `NULL` y no filtran nada.
-- **Manejo de excepciones:** cada escritura va dentro de una transacción con `COMMIT` o `ROLLBACK`. Los errores de Oracle se traducen a mensajes claros, por ejemplo *"No se puede eliminar: hay reservas que dependen de este registro"*, y `main.py` atrapa cualquier error que no se haya manejado en una página.
-- **Credenciales fuera del código:** el usuario, las contraseñas y el wallet se leen de `.streamlit/secrets.toml`, que no está en el repositorio.
-- **Consultas SQL de solo lectura:** la página de consultas libres solo acepta `SELECT` y lo ejecuta en una transacción de solo lectura.
+- **Ordenado por partes.** El código está dividido en archivos, y cada uno se encarga de una sola cosa: uno se conecta a la base, otro guarda las reglas del hotel, otro arma las tablas y los gráficos. Cada página de la app tiene su propio archivo dentro de la carpeta `paginas/`.
+
+- **Una sola puerta a la base de datos.** Solo el archivo `conexion.py` se comunica con Oracle. Las páginas no se conectan por su cuenta: le piden los datos a ese archivo. Así, si algún día cambia la forma de conectarse, se cambia en un solo lugar.
+
+- **Protegido contra ataques.** Lo que el usuario escribe nunca se mezcla con las instrucciones SQL: se envía a Oracle por separado, como un dato. Por ejemplo, si alguien escribe código malicioso en el campo del documento, Oracle lo trata como un número de documento más y no lo ejecuta. Esto protege contra un ataque llamado *inyección SQL*.
+
+- **Los errores no dañan los datos.** Cada vez que se guarda o se cambia algo, la app lo hace en un solo paso: o se guarda todo, o no se guarda nada. Si algo falla en la mitad, todo vuelve a como estaba. Además, cuando Oracle rechaza una operación, la app muestra un mensaje claro, como *"No se puede eliminar: hay reservas que dependen de este registro"*, en lugar de un error técnico.
+
+- **Las contraseñas no están en el código.** El usuario, las contraseñas y la ubicación del wallet se guardan en un archivo aparte, `.streamlit/secrets.toml`, que no se sube a GitHub.
+
+- **La página de consultas libres solo permite leer.** En Consultas SQL se pueden hacer preguntas a la base con `SELECT`, pero no se puede borrar ni cambiar nada. Los cambios solo se hacen desde las páginas de la app, que revisan las reglas del hotel antes de guardar.
 
 ---
 
