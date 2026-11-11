@@ -106,7 +106,7 @@ Hay reglas que la base **no puede** revisar sola, porque necesitan mirar otra ta
 - La habitación está libre en esas fechas.
 - La temporada corresponde a la fecha de entrada.
 - El valor se calcula así: precio por noche × noches × (1 + recargo de la temporada).
-- El huésped es mayor de edad.
+- El huésped **que reserva** es mayor de edad.
 
 Una reserva pasa por estos estados:
 
@@ -136,8 +136,8 @@ Los datos son inventados, pero se comportan como los de un hotel real: hay más 
 
 1. Crea una base **Oracle Autonomous Database** gratuita (Always Free) y descarga su **wallet**.
 2. Abre SQL Developer y conéctate a la base con el wallet.
-3. Abre `DDL_hotel.sql` y ejecútalo con **F5**. Se crean las 4 tablas.
-4. Abre `DML_hotel.sql` y ejecútalo con **F5**. Se cargan los datos (tarda de 1 a 3 minutos).
+3. Abre `DDL_hotel.sql` y ejecútalo. Se crean las 4 tablas.
+4. Abre `DML_hotel.sql` y ejecútalo. Se cargan los datos.
 
 ### 2. Correr la app
 
