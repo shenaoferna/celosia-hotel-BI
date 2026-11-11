@@ -163,7 +163,7 @@ Hay reglas que la base **no puede** revisar sola, porque necesitan mirar otra ta
 - La habitación está libre en esas fechas.
 - La temporada corresponde a la fecha de entrada.
 - El valor se calcula así: precio por noche × noches × (1 + recargo de la temporada).
-- El huésped es mayor de edad.
+- El huésped **que reserva** es mayor de edad.
 
 Una reserva pasa por estos estados:
 
