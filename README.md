@@ -136,8 +136,6 @@ Hay varios niveles de normalización, llamados **formas normales**. Cada uno agr
 
 ### Tres excepciones hechas a propósito
 
-En `reserva` hay tres datos que se podrían calcular a partir de otros. Una normalización estricta diría que no deberían guardarse, pero aquí se guardan por buenas razones, y es lo habitual en la tabla principal de un modelo estrella:
-
 | Dato | Se podría calcular con | Por qué se guarda de todas formas | Qué evita errores |
 |---|---|---|---|
 | `re_noches` | La fecha de salida menos la de entrada | Se usa en casi todos los análisis, y así no hay que calcularlo cada vez | Una regla de la base exige que coincida con las fechas |
