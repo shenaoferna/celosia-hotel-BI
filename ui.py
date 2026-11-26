@@ -88,8 +88,9 @@ def apply_style():
     div[data-testid="stMetric"] { background: #FFFFFF; border: 1px solid #E7E1D5; border-top: 4px solid #916E27;
         border-radius: 14px; padding: 14px 16px 12px; }
     div[data-testid="stMetricLabel"] * { color: #6B655C; font-weight: 700; }
-    div[data-testid="stMetricValue"] { color: #1C1C1C; font-weight: 800; font-variant-numeric: lining-nums tabular-nums;
-        font-size: clamp(1.5rem, 2.1vw, 2.1rem); }
+    div[data-testid="stMetricValue"] { color: #1C1C1C; font-weight: 800; font-variant-numeric: lining-nums tabular-nums; }
+    div[data-testid="stMetricValue"], div[data-testid="stMetricValue"] > div, div[data-testid="stMetricValue"] p {
+        font-size: clamp(1.3rem, 1.6vw, 1.9rem) !important; overflow: visible !important; text-overflow: clip !important; }
 
     /* ---------- Tabs ---------- */
     .stTabs [data-baseweb="tab-list"] { gap: 6px; border-bottom: 2px solid #E7E1D5; }
