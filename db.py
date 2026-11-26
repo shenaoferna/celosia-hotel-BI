@@ -11,7 +11,7 @@ import streamlit as st
 
 @st.cache_resource
 def get_pool():
-    s = st.secrets["oracle"]
+    s = dict(st.secrets["oracle"])   # a plain dict, so optional keys like config_dir can be missing
     if "lib_dir" in s:   # thick mode (Instant Client)
         oracledb.init_oracle_client(lib_dir=s["lib_dir"], config_dir=s["config_dir"])
         return oracledb.create_pool(user=s["user"], password=s["password"], dsn=s["dsn"], min=1, max=4)
