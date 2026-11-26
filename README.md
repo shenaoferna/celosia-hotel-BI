@@ -295,4 +295,4 @@ It runs from January 2025 to February 2027, with reservation statuses calculated
 ---
 
 **Author:** Sara Henao Fernández · Introduction to Business Intelligence, Universidad EAFIT
-[LinkedIn](https://www.linkedin.com/in/YOUR-PROFILE) · [Portfolio](https://github.com/shenaoferna)
+[LinkedIn](https://www.linkedin.com/in/sara-henao-fern%C3%A1ndez-0736752a6/) · [Portfolio](https://github.com/shenaoferna)
