@@ -103,11 +103,11 @@ def apply_style():
     .st-key-search_box { background: #E6F1FB; border: 1.5px solid #B5D4F4; border-radius: 18px; padding: 18px 18px 6px; }
     .st-key-confirm_box { background: #FFFFFF; border: 1.5px solid #D6E4F5; border-left: 6px solid #B83F6C;
         border-radius: 16px; padding: 18px; }
-    div[class*="st-key-room_card_"] { background: #FFFFFF; border: 1px solid #D6E4F5; border-radius: 16px; padding: 0 0 14px;
-        overflow: hidden; transition: box-shadow .15s, transform .15s; }
+    div[class*="st-key-room_card_"], div[class*="st-key-chosen_"] { background: #FFFFFF; border: 1px solid #D6E4F5;
+        border-radius: 16px; padding: 0 0 14px; overflow: hidden; transition: box-shadow .15s, transform .15s; }
     div[class*="st-key-room_card_"]:hover { box-shadow: 0 8px 24px rgba(12,68,124,.14); transform: translateY(-2px); }
-    div[class*="st-key-room_card_"] > div { padding-left: 14px; padding-right: 14px; }
-    div[class*="st-key-chosen_"] { border: 2.5px solid #B83F6C !important; }
+    div[class*="st-key-room_card_"] > div, div[class*="st-key-chosen_"] > div { padding-left: 14px; padding-right: 14px; }
+    div[class*="st-key-chosen_"] { border: 2.5px solid #B83F6C !important; box-shadow: 0 8px 24px rgba(184,63,108,.18); }
     .photo { margin: 0 -14px 10px; height: 96px; display: flex; align-items: center; justify-content: center; }
     .photo .ms { font-size: 52px; }
     .room-title { font-size: 1.15rem; font-weight: 800; color: #0C447C; margin: 0; }
