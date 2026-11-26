@@ -1,5 +1,7 @@
 """Single access point to Oracle: connection pool, reads, writes in transactions and error messages."""
 
+import os
+import tempfile
 from contextlib import contextmanager
 
 import oracledb
@@ -13,9 +15,14 @@ def get_pool():
     if "lib_dir" in s:   # thick mode (Instant Client)
         oracledb.init_oracle_client(lib_dir=s["lib_dir"], config_dir=s["config_dir"])
         return oracledb.create_pool(user=s["user"], password=s["password"], dsn=s["dsn"], min=1, max=4)
+    wallet_dir = s.get("wallet_location", s.get("config_dir"))
+    if "ewallet_pem" in s:   # Streamlit Cloud: the wallet is stored in the secrets, not in a folder
+        wallet_dir = tempfile.mkdtemp()
+        with open(os.path.join(wallet_dir, "ewallet.pem"), "w") as f:
+            f.write(s["ewallet_pem"])
     return oracledb.create_pool(   # thin mode: the wallet is passed as parameters
         user=s["user"], password=s["password"], dsn=s["dsn"], min=1, max=4,
-        config_dir=s["config_dir"], wallet_location=s.get("wallet_location", s["config_dir"]),
+        config_dir=s.get("config_dir"), wallet_location=wallet_dir,
         wallet_password=s["wallet_password"])
 
 

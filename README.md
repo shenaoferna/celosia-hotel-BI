@@ -270,6 +270,24 @@ It runs from January 2025 to February 2027, with reservation statuses calculated
    **This file contains your passwords. Never upload it to GitHub.**
 4. Run `streamlit run main.py`
 
+### 3. Publish it online (Streamlit Community Cloud)
+1. Sign in at [share.streamlit.io](https://share.streamlit.io) with GitHub and click **Create app**.
+2. Choose this repository, branch `main`, main file `main.py`. In **Advanced settings**, pick Python 3.12.
+3. In **Secrets**, paste the database settings. There's no wallet folder in the cloud, so the wallet goes inside the secrets:
+   ```toml
+   [oracle]
+   user = "ADMIN"
+   password = "your_database_password"
+   wallet_password = "your_wallet_password"
+   dsn = "(description= ... )"   # the full line for adbhotel_low, copied from tnsnames.ora
+   ewallet_pem = """
+   -----BEGIN ENCRYPTED PRIVATE KEY-----
+   ... the whole content of ewallet.pem ...
+   -----END CERTIFICATE-----
+   """
+   ```
+4. Click **Deploy**. The secrets stay private: they're never shown in the repository.
+
 ---
 
 **Author:** Sara Henao Fernández · Introduction to Business Intelligence, Universidad EAFIT
