@@ -7,7 +7,7 @@ import streamlit as st
 
 from config import CHANNEL_LABEL, INK, TODAY
 from risk import ACTION, LEVELS, current_model, load_history, score
-from ui import bar_chart, cop, page_title, table
+from ui import bar_chart, cop, cop_short, page_title, table
 
 
 def thousands(n):
@@ -52,9 +52,9 @@ def _upcoming_reservations(upcoming, info):
     k = st.columns(4)
     k[0].metric("Upcoming reservations", len(view))
     k[1].metric("High risk", len(high))
-    k[2].metric("Value at high risk", cop(high["re_total_amount"].astype(float).sum()))
-    k[3].metric("Revenue that could be lost", cop(view["value_at_risk"].sum()),
-                help="Each reservation's value × the real cancellation rate of its risk level in the hotel's history.")
+    k[2].metric("Value at high risk", cop_short(high["re_total_amount"].astype(float).sum()))
+    k[3].metric("Revenue that could be lost", cop_short(view["value_at_risk"].sum()),
+                help="Each reservation's value × the real cancellation rate of its risk level in the hotel's history. B = billions, M = millions of pesos.")
 
     shown = view[view["risk"].isin(levels)].sort_values("score", ascending=False).copy()
     if shown.empty:

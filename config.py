@@ -34,6 +34,22 @@ STATUS_LABEL = {"confirmed": "Confirmed", "in_house": "In house", "checked_out":
 ROOM_TYPE_LABEL = {"single": "Single", "double": "Double", "suite": "Suite", "family": "Family"}
 CHANNEL_LABEL = {"direct": "Direct", "booking": "Booking.com", "agency": "Travel agency", "walk_in": "Walk-in"}
 
+# Colombian rule for minors (Ley 679 de 2001 and Ley 1336 de 2009): before checking in a minor, the front desk
+# verifies the minor's ID and the document that proves who the accompanying adult is.
+MINORS_RULE = ("Before check-in, verify each minor's ID and the document that proves their relationship to the "
+               "accompanying adult: birth certificate (registro civil) if they come with a parent, or a notarized "
+               "authorization from the parents if they don't (Ley 679 de 2001 and Ley 1336 de 2009).")
+
+
+def party(adults, children):
+    """'2 adults, 1 child' style text for a reservation."""
+    adults, children = int(adults), int(children)
+    text = f"{adults} adult{'s' if adults != 1 else ''}"
+    if children:
+        text += f", {children} child{'ren' if children != 1 else ''}"
+    return text
+
+
 # Business assumptions (not stored in the database): commission each channel charges on the reservation amount
 COMMISSION = {"direct": 0.0, "walk_in": 0.0, "booking": 0.18, "agency": 0.12}
 

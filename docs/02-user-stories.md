@@ -43,7 +43,7 @@ The stories are grouped into six epics. Acceptance criteria use the Given / When
 ### US-04: See only rooms that can actually be booked
 **As a** front-desk agent, **I want to** see only the rooms that are free and big enough for the chosen dates and number of guests, **so that** I never offer a room I can't sell.
 
-- **Given** check-in and check-out dates and a number of guests, **when** I search, **then** the system lists only active rooms with enough capacity and no overlapping confirmed or in-progress reservation.
+- **Given** check-in and check-out dates and a number of adults and children, **when** I search, **then** the system lists only active rooms with enough capacity and no overlapping confirmed or in-progress reservation.
 - **Given** a room in maintenance, **when** I search any dates, **then** that room isn't listed.
 - **Given** no room fits, **when** I search, **then** the system suggests trying other dates or fewer guests.
 
@@ -160,6 +160,18 @@ The stories are grouped into six epics. Acceptance criteria use the Given / When
 
 *Traces to: FR-18, BO-6. Priority: Should.*
 
+## Epic 7: Guest safety and compliance
+
+### US-17: Protect minors at check-in
+**As a** front-desk agent, **I want** the system to tell me which reservations include minors and to block their check-in until I've checked their documents, **so that** the hotel complies with Colombian child-protection law and no minor is checked in with an adult who can't prove the relationship.
+
+- **Given** a new reservation, **when** I enter 2 adults and 1 child, **then** the system counts 3 guests against the room's capacity and shows the minors' document requirement before I confirm.
+- **Given** a reservation without any adult, **when** I try to save it, **then** the system doesn't allow it (at least 1 adult is required).
+- **Given** today's arrivals, **when** a reservation includes minors, **then** its Check-in button stays disabled until I tick "Minors' documents verified".
+- **Given** a reservation with adults only, **when** I check it in, **then** no extra step is shown.
+
+*Traces to: FR-19, BR-05, BR-15. Priority: Must.*
+
 ---
 
 ## Traceability matrix
@@ -184,3 +196,4 @@ The stories are grouped into six epics. Acceptance criteria use the Given / When
 | FR-16 | US-14 | `ui.py` |
 | FR-17 | US-15 | `app_pages/new_reservation.py`, `risk.py` |
 | FR-18 | US-16 | `app_pages/cancellation_risk.py`, `risk.py` |
+| FR-19 | US-17 | `app_pages/new_reservation.py`, `app_pages/today.py`, `app_pages/reservations.py`, `config.py` (`MINORS_RULE`), DDL `ck_reservation_adults` |

@@ -192,7 +192,7 @@ _CELL_COLOR = {
 # Readable headers for the SQL query aliases
 COLUMN_LABELS = {
     "reservation": "Reservation", "guest": "Guest", "id_number": "ID number", "room": "Room", "room_type": "Room type",
-    "season": "Season", "check_in": "Arrival", "check_out": "Departure", "nights": "Nights", "guests": "Guests",
+    "season": "Season", "check_in": "Arrival", "check_out": "Departure", "nights": "Nights", "guests": "Guests", "adults": "Adults", "children": "Children",
     "amount": "Amount", "status": "Status", "channel": "Channel", "rating": "Rating", "check_in_time": "Check-in",
     "check_out_time": "Check-out", "capacity": "Capacity", "floor": "Floor", "nightly_rate": "Nightly rate",
     "today": "Today", "start_date": "Start", "end_date": "End", "surcharge": "Surcharge", "country": "Country",
@@ -235,6 +235,19 @@ def cop(v):
         return f"COP {float(v):,.0f}"
     except (TypeError, ValueError):
         return "COP 0"
+
+
+def cop_short(v):
+    """Short form for KPI cards, so big amounts aren't cut off: 1234567890 -> 'COP 1.23 B', 25640000 -> 'COP 25.6 M'."""
+    try:
+        v = float(v)
+    except (TypeError, ValueError):
+        return "COP 0"
+    if abs(v) >= 1e9:
+        return f"COP {v / 1e9:.2f} B"
+    if abs(v) >= 1e6:
+        return f"COP {v / 1e6:.1f} M"
+    return cop(v)
 
 
 def excel_button(df, name):

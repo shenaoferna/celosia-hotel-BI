@@ -7,10 +7,10 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-from config import CHANNELS, GOLD, INK, REVENUE_NOTE, ROOM_TYPE_LABEL, TODAY
+from config import CHANNELS, GOLD, INK, MINORS_RULE, REVENUE_NOTE, ROOM_TYPE_LABEL, TODAY, party
 from db import query, scalar
 from rules import check_in, check_out, same_day_last_year
-from ui import bar_chart, chart_selection, cop, page_title, table
+from ui import bar_chart, chart_selection, cop, cop_short, page_title, table
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
@@ -29,8 +29,8 @@ def go_to_today():
 def front_desk_today():
     """Pending arrivals and departures, each with its button. Only makes sense for today."""
     base = """SELECT r.re_reservation_id AS reservation, ro.ro_number AS room, g.gu_name AS guest,
-                     r.re_check_in_date AS check_in, r.re_check_out_date AS check_out, r.re_guests AS guests,
-                     r.re_check_in_time AS check_in_time
+                     r.re_check_in_date AS check_in, r.re_check_out_date AS check_out, r.re_adults AS adults,
+                     r.re_children AS children, r.re_check_in_time AS check_in_time
               FROM reservation r JOIN room ro ON ro.ro_room_id = r.re_room_id
               JOIN guest g ON g.gu_guest_id = r.re_guest_id """
     to_arrive = query(base + """WHERE r.re_status = 'confirmed' AND r.re_check_in_date <= :today
@@ -48,8 +48,12 @@ def front_desk_today():
             arrival = pd.to_datetime(r.check_in).date()
             late = f", was due {arrival:%b %d}" if arrival < TODAY else ""
             a, b = st.columns([3, 1.3], vertical_alignment="center")
-            a.markdown(f"**{r.room}** {r.guest}, {r.guests} guest(s){late}")
-            b.button("Check-in", key=f"in_{r.reservation}", on_click=check_in, args=(r.reservation,), type="primary")
+            a.markdown(f"**{r.room}** {r.guest}, {party(r.adults, r.children)}{late}")
+            verified = True
+            if r.children:      # minors: the documents must be checked before check-in
+                verified = a.checkbox("Minors' documents verified", key=f"docs_{r.reservation}", help=MINORS_RULE)
+            b.button("Check-in", key=f"in_{r.reservation}", on_click=check_in, args=(r.reservation,), type="primary",
+                     disabled=not verified, help=None if verified else "Verify the minors' documents first.")
     with right:
         st.markdown(f"**Pending check-outs ({len(to_leave)})**")
         if to_leave.empty:
@@ -80,7 +84,7 @@ def today():
     stays = query("""
         SELECT ro.ro_number AS room, r.re_reservation_id AS reservation, g.gu_name AS guest,
                r.re_check_in_date AS check_in, r.re_check_out_date AS check_out, r.re_guests AS guests,
-               r.re_nights AS nights, r.re_total_amount AS amount, r.re_channel AS channel, ro.ro_type AS room_type,
+               r.re_children AS children, r.re_nights AS nights, r.re_total_amount AS amount, r.re_channel AS channel, ro.ro_type AS room_type,
                r.re_status AS status, r.re_check_in_time AS check_in_time, r.re_check_out_time AS check_out_time
         FROM reservation r
         JOIN room ro ON ro.ro_room_id = r.re_room_id
@@ -112,7 +116,7 @@ def today():
     k[1].metric("Arrivals", len(arriving))
     k[2].metric("Departures", len(leaving))
     k[3].metric("Guests in house", int(in_house["guests"].sum()) if len(in_house) else 0)
-    k[4].metric(f"Revenue {d.year} to {d:%b %d}", cop(ytd),
+    k[4].metric(f"Revenue {d.year} to {d:%b %d}", cop_short(ytd),
                 f"{100 * (ytd - ytd_last_year) / ytd_last_year:+.1f}% vs. {d.year - 1}" if ytd_last_year else None)
 
     # ---------- the building, floor by floor ----------
@@ -158,7 +162,7 @@ def today():
             if rows.empty:
                 st.caption("No records for this day.")
             else:
-                table(rows[["room", "guest", "check_in", "check_out", "nights", "guests", "channel", "status",
+                table(rows[["room", "guest", "check_in", "check_out", "nights", "guests", "children", "channel", "status",
                             "check_in_time", "check_out_time", "amount"]],
                       money=["amount"], times=["check_in_time", "check_out_time"], export=f"{name}_{d:%Y%m%d}")
 

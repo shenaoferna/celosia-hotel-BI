@@ -73,7 +73,7 @@ See [Stakeholder analysis](04-stakeholder-analysis.md). The main stakeholders ar
 | BR-02 | Document format: national ID (CC) is 5–10 digits, foreign ID (CE) is 4–7 digits, passport (PAS) is 6–12 letters or digits | Database (CHECK) and app |
 | BR-03 | Only an adult (18 or older) can make a reservation | App |
 | BR-04 | A reservation is for exactly one room. A group needing several rooms makes several reservations. | Data model |
-| BR-05 | The number of guests can't exceed the room's capacity (1–6) | App and database |
+| BR-05 | Adults + children can't exceed the room's capacity (1–6), and every reservation has at least one adult | App and database |
 | BR-06 | A room can't have two active reservations with overlapping dates. Cancelled reservations don't block the room. | App |
 | BR-07 | Rooms in maintenance can't be booked | App |
 | BR-08 | Check-out must be after check-in, and nights = check-out date − check-in date | Database (CHECK) |
@@ -83,6 +83,7 @@ See [Stakeholder analysis](04-stakeholder-analysis.md). The main stakeholders ar
 | BR-12 | Check-in is only possible on or after the check-in date and before the check-out date | App |
 | BR-13 | A stay can only be rated (1–5) after it's completed | Database (CHECK) |
 | BR-14 | Guests, rooms or seasons with reservations can't be deleted, so history is never lost | Database (foreign keys) and app |
+| BR-15 | A reservation with minors (under 18) can only be checked in after the front desk verifies each minor's ID and the document that proves their relationship to the accompanying adult: birth certificate, or a notarized authorization from the parents. This supports the hotel's code of conduct against the sexual exploitation of children (Ley 679 de 2001, Ley 1336 de 2009). | App (check-in is blocked until verified) |
 
 ## 7. Functional requirements
 
@@ -90,10 +91,10 @@ See [Stakeholder analysis](04-stakeholder-analysis.md). The main stakeholders ar
 |---|---|---|
 | FR-01 | Register a guest with name, document, date of birth, email, phone and country, validating the document format | Must |
 | FR-02 | Search for a guest by document and show their reservation history | Must |
-| FR-03 | Show only the rooms available for the selected dates and number of guests | Must |
+| FR-03 | Show only the rooms available for the selected dates and number of adults and children | Must |
 | FR-04 | Calculate and show the total price before the booking is confirmed | Must |
 | FR-05 | Create a reservation with a sales channel (direct, Booking/OTA, travel agency, walk-in) | Must |
-| FR-06 | Modify a confirmed reservation's dates, guests or room, recalculating the price | Must |
+| FR-06 | Modify a confirmed reservation's dates, adults, children or room, recalculating the price | Must |
 | FR-07 | Cancel a confirmed reservation | Must |
 | FR-08 | Show the day's arrivals and departures and register check-in and check-out with a timestamp | Must |
 | FR-09 | Show an occupancy map of each room for each day of the month | Should |
@@ -106,6 +107,7 @@ See [Stakeholder analysis](04-stakeholder-analysis.md). The main stakeholders ar
 | FR-16 | Export any table to Excel | Could |
 | FR-17 | Before confirming a new reservation, show its cancellation risk level (high, medium or low), the historical cancellation rate for that level, and the recommended action | Should |
 | FR-18 | List upcoming confirmed reservations ranked by cancellation risk, with the revenue at risk, filters by period and level, and an explanation of how the model works | Should |
+| FR-19 | Record adults and children separately on each reservation, remind the front desk of the minors' document requirement when booking, and block check-in until those documents are marked as verified | Must |
 
 User stories and acceptance criteria for each requirement are in [User stories](02-user-stories.md).
 

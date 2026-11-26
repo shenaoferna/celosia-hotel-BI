@@ -73,8 +73,8 @@ The strongest signals are the **sales channel** (Booking.com cancels most and wa
 ## What the app does
 
 **Front desk**
-- **Today:** see the hotel's status floor by floor on any date, and check today's guests in and out.
-- **New reservation:** find the guest, search by dates and guests, and choose from cards showing only the rooms that are available, with the calculated price.
+- **Today:** see the hotel's status floor by floor on any date, and check today's guests in and out. Reservations with minors need their documents verified before check-in.
+- **New reservation:** find the guest, search by dates, adults and children, and choose from cards showing only the rooms that are available, with the calculated price.
 - **Reservations:** search, cancel or modify reservations, and rate completed stays.
 - **Guests:** register new guests, view their history, and delete guests who have no reservations.
 
@@ -143,7 +143,9 @@ erDiagram
         DATE re_check_in_date
         DATE re_check_out_date
         NUMBER re_nights
-        NUMBER re_guests
+        NUMBER re_adults
+        NUMBER re_children
+        NUMBER re_guests "virtual: adults + children"
         NUMBER re_total_amount
         VARCHAR2 re_status
         VARCHAR2 re_channel
@@ -170,6 +172,7 @@ The tables are in **third normal form (3NF)**, with three deliberate exceptions 
 |---|---|---|---|
 | `re_nights` | check-out − check-in | It's the measure almost every analysis uses | A CHECK constraint requires it to match the dates |
 | `re_total_amount` | price × nights × surcharge | It's what was charged at booking time. If rates change later, the reservation keeps its original value | The app calculates it when booking or modifying |
+| `re_guests` | adults + children | The capacity rules and charts use the total | It's a virtual column: Oracle calculates it, so it can never disagree |
 | `re_season_id` | the check-in date | It joins the reservation to its season with a foreign key, like any dimension | The app assigns it from the check-in date |
 
 ## Business rules
@@ -177,16 +180,17 @@ The tables are in **third normal form (3NF)**, with three deliberate exceptions 
 **Enforced by the database (CHECK, UNIQUE and FK constraints)**
 - No two guests can have the same document type and number.
 - A national ID (CC) has only digits. A passport has letters and digits.
-- A room holds 1 to 6 people.
+- A room holds 1 to 6 people, and every reservation has at least 1 adult.
 - Check-out must be after check-in, and the number of nights must match the dates.
 - A stay can only be rated once it has ended.
 
 **Enforced by the app**, because these rules need another table, other rows or today's date:
-- The guests fit in the room.
+- The guests (adults + children) fit in the room.
 - The room is active and free on those dates.
 - The season matches the check-in date.
 - Total price = nightly price × nights × (1 + season surcharge / 100).
 - The guest making the booking is an adult.
+- Minors can only be checked in after their ID and the document proving their relationship to the adult are verified (Ley 679 de 2001 and Ley 1336 de 2009).
 
 **Reservation life cycle**
 
@@ -233,7 +237,7 @@ It runs from January 2025 to February 2027, with reservation statuses calculated
 
 | File | What it is |
 |---|---|
-| `DDL_hotel.sql` | Creates the 4 tables and their constraints. Run it first |
+| `DDL_hotel.sql` | Creates the 4 tables and their constraints. Run it first. It can be run again: it drops the old tables first |
 | `DML_hotel.sql` | Loads the test data. Run it after the DDL |
 | `main.py` | Starts the app: navigation and general error handling |
 | `config.py` | Hotel identity, color palette and business parameters |

@@ -73,7 +73,7 @@ def occupancy_map():
             info = query("""
                 SELECT r.re_reservation_id AS reservation, g.gu_name AS guest, g.gu_country AS country,
                        r.re_check_in_date AS check_in, r.re_check_out_date AS check_out, r.re_nights AS nights,
-                       r.re_guests AS guests, r.re_channel AS channel, r.re_total_amount AS amount,
+                       r.re_guests AS guests, r.re_children AS children, r.re_channel AS channel, r.re_total_amount AS amount,
                        r.re_status AS status
                 FROM reservation r JOIN guest g ON g.gu_guest_id = r.re_guest_id
                 WHERE r.re_reservation_id = :id""", {"id": reservation_id})

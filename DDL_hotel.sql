@@ -2,7 +2,20 @@
 -- DDL CELOSÍA HOTEL - Sara Henao Fernández
 -- Star schema: guest, room and season (dimensions) + reservation (fact table).
 -- Grain of RESERVATION: one room booked by one guest for one stay.
+-- Safe to run again: it first drops the 4 tables if they exist, then creates them from scratch.
+-- After it, run DML_hotel.sql to load the test data.
 -- =====================================================
+
+-- ---------------------- CLEAN START ----------------------
+-- Drops the tables in foreign-key order (the fact table first). Skips any table that doesn't exist yet.
+BEGIN
+    FOR t IN (SELECT table_name FROM user_tables
+              WHERE table_name IN ('RESERVATION', 'GUEST', 'ROOM', 'SEASON')
+              ORDER BY CASE table_name WHEN 'RESERVATION' THEN 0 ELSE 1 END) LOOP
+        EXECUTE IMMEDIATE 'DROP TABLE ' || t.table_name || ' CASCADE CONSTRAINTS PURGE';
+    END LOOP;
+END;
+/
 
 -- ---------------------- DIMENSIONS ----------------------
 
@@ -68,7 +81,9 @@ CREATE TABLE reservation (
     re_check_in_date    DATE          NOT NULL,
     re_check_out_date   DATE          NOT NULL,
     re_nights           NUMBER(3)     NOT NULL,
-    re_guests           NUMBER(1)     NOT NULL,
+    re_adults           NUMBER(1)     NOT NULL,
+    re_children         NUMBER(1)     DEFAULT 0 NOT NULL,
+    re_guests           NUMBER(1)     GENERATED ALWAYS AS (re_adults + re_children) VIRTUAL,
     re_total_amount     NUMBER(12,2)  NOT NULL,
     re_status           VARCHAR2(20)  DEFAULT 'confirmed' NOT NULL,
     re_channel          VARCHAR2(20)  DEFAULT 'direct' NOT NULL,
@@ -80,7 +95,8 @@ CREATE TABLE reservation (
     CONSTRAINT ck_reservation_dates CHECK (re_check_out_date > re_check_in_date),
     CONSTRAINT ck_reservation_booking_date CHECK (re_booking_date <= re_check_in_date),
     CONSTRAINT ck_reservation_nights CHECK (re_nights > 0 AND re_nights = re_check_out_date - re_check_in_date),
-    CONSTRAINT ck_reservation_guests CHECK (re_guests >= 1),
+    CONSTRAINT ck_reservation_adults CHECK (re_adults >= 1),
+    CONSTRAINT ck_reservation_children CHECK (re_children >= 0),
     CONSTRAINT ck_reservation_amount CHECK (re_total_amount >= 0),
     CONSTRAINT ck_reservation_status CHECK (re_status IN ('confirmed','in_house','cancelled','checked_out')),
     CONSTRAINT ck_reservation_channel CHECK (re_channel IN ('direct','booking','agency','walk_in')),
@@ -101,9 +117,11 @@ CREATE TABLE reservation (
 --
 -- Rules that can't be CHECK constraints (they depend on another table, other rows or today's date)
 -- and that the application validates before saving:
---   1. re_guests <= ro_capacity of the room.
+--   1. re_guests (adults + children) <= ro_capacity of the room.
 --   2. The room is 'active' and has no other non-cancelled reservation with overlapping dates.
 --   3. re_season_id matches the season that contains re_check_in_date.
 --   4. re_total_amount = ro_nightly_rate * re_nights * (1 + se_surcharge / 100).
 --   5. The guest is an adult when making the reservation.
 --   6. Check-in is only recorded once the stay has started.
+--   7. If re_children > 0, the front desk verifies each minor's ID and the document that proves the relationship
+--      to the accompanying adult before check-in (Ley 679 de 2001 and Ley 1336 de 2009).

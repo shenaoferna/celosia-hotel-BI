@@ -59,7 +59,7 @@ flowchart LR
         B[Searches guest<br/>by document]
         C{Guest exists?}
         D[Registers guest]
-        E[Enters dates and<br/>number of guests]
+        E[Enters dates,<br/>adults and children]
         M[Selects room and<br/>channel, confirms]
     end
     subgraph S[Celosía system]
@@ -129,6 +129,7 @@ flowchart LR
     end
     subgraph F[Front desk]
         B[Opens Daily overview:<br/>today's arrivals]
+        MD[Verifies minors' ID and<br/>relationship document]
         E[Clicks Check-in,<br/>hands over key]
         H[Clicks Check-out,<br/>takes key back]
         R[Records 1–5<br/>satisfaction rating]
@@ -140,13 +141,16 @@ flowchart LR
         N[Walk-in: create reservation<br/>with channel 'walk_in']
     end
     A --> B --> V
-    V -- Yes --> E --> W
+    V -- Yes --> MN{Includes<br/>minors?}
+    MN -- No --> E --> W
+    MN -- Yes --> MD --> E
     V -- No booking --> N --> E
     W -. stay .-> H --> X --> R --> Z
 ```
 
 **What changes:**
 - The front desk sees who should arrive and leave today without searching.
+- Reservations with minors can't be checked in until the agent confirms the minors' documents were verified (Ley 1336 de 2009).
 - Exact check-in and check-out times are stored. They feed the arrival-pattern chart on the Performance page, which helps with staffing.
 - Walk-ins are recorded as a sales channel, so management can measure them.
 - Satisfaction is captured at the end of every stay.

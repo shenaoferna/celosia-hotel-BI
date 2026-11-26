@@ -6,7 +6,7 @@ import oracledb
 import pandas as pd
 import streamlit as st
 
-from config import CHANNELS, CHANNEL_LABEL, ROOM_TYPE_LABEL, TODAY
+from config import CHANNEL_LABEL, CHANNELS, MINORS_RULE, ROOM_TYPE_LABEL, TODAY, party
 from db import query, transaction
 from risk import ACTION, current_model, guest_history, new_booking_row, score
 from rules import age, guest_by_id_number
@@ -104,16 +104,21 @@ def new_reservation():
     # ---- Step 2: date and guest search ----
     st.subheader("2. Dates and guests")
     with st.container(key="search_box"):
-        c1, c2, c3, c4 = st.columns([1, 1, 0.7, 1.6])
+        c1, c2, c3, c3b, c4 = st.columns([1, 1, 0.7, 0.7, 1.5])
         check_in = c1.date_input("Check-in", value=TODAY, min_value=TODAY, format="MM/DD/YYYY")
         check_out = c2.date_input("Check-out", value=check_in + dt.timedelta(days=1), min_value=TODAY,
                                   format="MM/DD/YYYY")
-        guests = c3.number_input("Guests", min_value=1, max_value=6, value=1)
+        adults = c3.number_input("Adults", min_value=1, max_value=6, value=1)
+        children = c3b.number_input("Children", min_value=0, max_value=5, value=0, help="Guests under 18.")
         channel = c4.selectbox("Booking channel", list(CHANNELS), format_func=CHANNELS.get,
                                index=3 if check_in == TODAY else 0)
     nights = (check_out - check_in).days
     if nights <= 0:
         st.error("The check-out date must be after the check-in date.")
+        return
+    guests = int(adults) + int(children)      # the room's capacity counts everyone, adults and children
+    if guests > 6:
+        st.error("The largest room holds 6 guests. Split the group into two reservations.")
         return
 
     # The check-in date determines the season
@@ -126,7 +131,7 @@ def new_reservation():
     surcharge = float(season["se_surcharge"])
 
     # If the search changes, forget the room chosen before
-    search = (int(g["gu_guest_id"]), check_in, check_out, int(guests), channel)
+    search = (int(g["gu_guest_id"]), check_in, check_out, int(adults), int(children), channel)
     if st.session_state.get("nr_search") != search:
         st.session_state.nr_search = search
         st.session_state.nr_room = None
@@ -145,7 +150,7 @@ def new_reservation():
         ORDER BY ro.ro_nightly_rate, ro.ro_number""", {"guests": guests, "check_out": check_out, "check_in": check_in})
     st.subheader(f"3. Available rooms ({len(available)})")
     st.markdown(f'{badge(season["se_name"], "checked_out")} &nbsp; season surcharge {surcharge:.0f}% · '
-                f'{nights} night(s) · {int(guests)} guest(s)', unsafe_allow_html=True)
+                f'{nights} night(s) · {party(adults, children)}', unsafe_allow_html=True)
     if available.empty:
         st.warning("No rooms with that capacity are free on those dates. Try other dates or fewer guests.")
         return
@@ -176,13 +181,18 @@ def new_reservation():
     with st.container(key="confirm_box"):
         st.markdown(f"**{g['gu_name']}** · room **{chosen.ro_number}** "
                     f"({ROOM_TYPE_LABEL.get(chosen.ro_type, chosen.ro_type)}) · "
-                    f"**{check_in:%b %d, %Y}** to **{check_out:%b %d, %Y}** · {CHANNEL_LABEL.get(channel, channel)}")
+                    f"**{check_in:%b %d, %Y}** to **{check_out:%b %d, %Y}** · {party(adults, children)} · "
+                    f"{CHANNEL_LABEL.get(channel, channel)}")
         k = st.columns(4)
         k[0].metric("Room", chosen.ro_number)
         k[1].metric("Nightly rate", cop(chosen.ro_nightly_rate))
         k[2].metric("Nights", nights)
         k[3].metric("Total", cop(chosen.total_amount))
         risk_message(risks.get(chosen_id), info)
+        if children:
+            minors = f"{int(children)} minor{'s' if children != 1 else ''}"
+            st.info(f"**This reservation includes {minors}.** {MINORS_RULE}",
+                    icon=":material/child_care:")
 
         if st.button("Confirm reservation", type="primary", icon=":material/event_available:"):
             try:
@@ -197,14 +207,14 @@ def new_reservation():
                     new_id = cur.var(oracledb.NUMBER)
                     cur.execute("""
                         INSERT INTO reservation (re_guest_id, re_room_id, re_season_id, re_booking_date,
-                                                 re_check_in_date, re_check_out_date, re_nights, re_guests,
+                                                 re_check_in_date, re_check_out_date, re_nights, re_adults, re_children,
                                                  re_total_amount, re_status, re_channel)
-                        VALUES (:guest_id, :room_id, :season_id, :booked, :check_in, :check_out, :nights, :guests,
+                        VALUES (:guest_id, :room_id, :season_id, :booked, :check_in, :check_out, :nights, :adults, :children,
                                 :amount, 'confirmed', :channel)
                         RETURNING re_reservation_id INTO :new_id""",
                         {"guest_id": int(g["gu_guest_id"]), "room_id": int(chosen.ro_room_id),
                          "season_id": int(season["se_season_id"]), "booked": TODAY, "check_in": check_in,
-                         "check_out": check_out, "nights": nights, "guests": int(guests),
+                         "check_out": check_out, "nights": nights, "adults": int(adults), "children": int(children),
                          "amount": float(chosen.total_amount), "channel": channel, "new_id": new_id})
                     number = int(new_id.getvalue()[0])
                 st.session_state.nr_room = None

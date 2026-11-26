@@ -6,10 +6,10 @@ import oracledb
 import pandas as pd
 import streamlit as st
 
-from config import ROOM_TYPE_LABEL, STATUSES, STATUS_LABEL, TODAY
+from config import MINORS_RULE, ROOM_TYPE_LABEL, STATUSES, STATUS_LABEL, TODAY, party
 from db import error_message, execute_write, query, transaction
 from rules import check_in, check_out, clean_id_number
-from ui import cop, page_title, table
+from ui import cop, cop_short, page_title, table
 
 
 def reservations():
@@ -29,7 +29,7 @@ def reservations():
     sql = """SELECT r.re_reservation_id AS reservation, g.gu_name AS guest, g.gu_id_number AS id_number,
                     ro.ro_number AS room, ro.ro_type AS room_type, s.se_name AS season,
                     r.re_check_in_date AS check_in, r.re_check_out_date AS check_out, r.re_nights AS nights,
-                    r.re_guests AS guests, r.re_total_amount AS amount, r.re_status AS status,
+                    r.re_guests AS guests, r.re_children AS children, r.re_total_amount AS amount, r.re_status AS status,
                     r.re_channel AS channel, r.re_rating AS rating,
                     r.re_check_in_time AS check_in_time, r.re_check_out_time AS check_out_time
              FROM reservation r
@@ -53,7 +53,7 @@ def reservations():
     k[0].metric("Reservations found", len(df))
     k[1].metric("Nights", int(df["nights"].sum()) if len(df) else 0)
     k[2].metric("Amount (excluding cancelled)",
-                cop(df.loc[df["status"] != "cancelled", "amount"].sum() if len(df) else 0))
+                cop_short(df.loc[df["status"] != "cancelled", "amount"].sum() if len(df) else 0))
     if df.empty:
         st.info("No reservations match those filters.")
     else:
@@ -64,7 +64,7 @@ def reservations():
     number = st.number_input("Reservation number", min_value=1, step=1, value=None, placeholder="2081")
     if number is None:
         return
-    r = query("""SELECT r.re_reservation_id, r.re_status, r.re_check_in_date, r.re_check_out_date, r.re_guests,
+    r = query("""SELECT r.re_reservation_id, r.re_status, r.re_check_in_date, r.re_check_out_date, r.re_adults, r.re_children,
                         r.re_room_id, r.re_total_amount, r.re_rating, r.re_check_in_time,
                         r.re_check_out_time, g.gu_name, ro.ro_number
                  FROM reservation r JOIN guest g ON g.gu_guest_id = r.re_guest_id
@@ -79,7 +79,8 @@ def reservations():
     arrival = pd.to_datetime(r["re_check_in_date"]).date()
     status = r["re_status"]
     fmt_time = lambda v: pd.to_datetime(v).strftime("%b %d, %Y %H:%M") if pd.notna(v) else "—"
-    st.write(f"**{r['gu_name']}**, room {r['ro_number']}, {arrival:%b %d, %Y} to {departure:%b %d, %Y}. "
+    st.write(f"**{r['gu_name']}**, room {r['ro_number']}, {arrival:%b %d, %Y} to {departure:%b %d, %Y}, "
+             f"{party(r['re_adults'], r['re_children'])}. "
              f"Status: **{STATUS_LABEL.get(status, status)}**.")
     if status in ("in_house", "checked_out"):
         st.caption(f"Check-in: {fmt_time(r['re_check_in_time'])}   Check-out: {fmt_time(r['re_check_out_time'])}")
@@ -107,31 +108,41 @@ def reservations():
         return
 
     # ---- confirmed: check-in, cancel or change ----
+    verified = True
+    if r["re_children"] and arrival <= TODAY < departure:     # minors: documents first, then check-in
+        st.warning(MINORS_RULE, icon=":material/child_care:")
+        verified = st.checkbox("Minors' documents verified", key=f"docs_{res_id}")
     b1, b2 = st.columns(2)
     can_check_in = arrival <= TODAY < departure
-    b1.button("Check in", type="primary", disabled=not can_check_in, on_click=check_in, args=(res_id,),
-              help=None if can_check_in else f"Check-in opens on {arrival:%b %d, %Y}.")
+    b1.button("Check in", type="primary", disabled=not (can_check_in and verified), on_click=check_in, args=(res_id,),
+              help=(f"Check-in opens on {arrival:%b %d, %Y}." if not can_check_in
+                    else None if verified else "Verify the minors' documents first."))
     if b2.button("Cancel reservation"):
         execute_write("UPDATE reservation SET re_status = 'cancelled' WHERE re_reservation_id = :id AND re_status = 'confirmed'",
                       {"id": res_id}, f"Reservation {res_id} cancelled.", "The reservation was no longer confirmed.")
         return
 
     with st.expander("Change dates, guests or room"):
-        change_reservation(res_id, arrival, departure, int(r["re_guests"]), int(r["re_room_id"]),
-                           float(r["re_total_amount"]))
+        change_reservation(res_id, arrival, departure, int(r["re_adults"]), int(r["re_children"]),
+                           int(r["re_room_id"]), float(r["re_total_amount"]))
 
 
-def change_reservation(res_id, arrival, departure, guests, current_room, current_amount):
+def change_reservation(res_id, arrival, departure, adults, children, current_room, current_amount):
     """Changes a confirmed reservation by applying the rules again: availability, capacity, season and amount."""
-    c1, c2, c3 = st.columns(3)
+    c1, c2, c3, c4 = st.columns([1, 1, 0.6, 0.6])
     new_in = c1.date_input("New check-in", value=max(arrival, TODAY), min_value=TODAY, format="MM/DD/YYYY",
                            key=f"m_in_{res_id}")
     new_out = c2.date_input("New check-out", value=max(departure, new_in + dt.timedelta(days=1)), format="MM/DD/YYYY",
                             key=f"m_out_{res_id}")
-    new_guests = c3.number_input("Guests", min_value=1, max_value=6, value=guests, key=f"m_guests_{res_id}")
+    new_adults = c3.number_input("Adults", min_value=1, max_value=6, value=adults, key=f"m_adults_{res_id}")
+    new_children = c4.number_input("Children", min_value=0, max_value=5, value=children, key=f"m_children_{res_id}")
+    new_guests = int(new_adults) + int(new_children)
     nights = (new_out - new_in).days
     if nights <= 0:
         st.error("The check-out date must be after the check-in date.")
+        return
+    if new_guests > 6:
+        st.error("The largest room holds 6 guests.")
         return
     season = query("""SELECT se_season_id, se_name, se_surcharge FROM season
                       WHERE :check_in BETWEEN se_start_date AND se_end_date""", {"check_in": new_in})
@@ -174,10 +185,10 @@ def change_reservation(res_id, arrival, departure, guests, current_room, current
                     raise ValueError("That room was just booked for those dates. Pick another one.")
                 cur.execute("""UPDATE reservation
                                SET re_check_in_date = :check_in, re_check_out_date = :check_out, re_nights = :nights,
-                                   re_guests = :guests, re_room_id = :room_id, re_season_id = :season_id,
+                                   re_adults = :adults, re_children = :children, re_room_id = :room_id, re_season_id = :season_id,
                                    re_total_amount = :amount
                                WHERE re_reservation_id = :id AND re_status = 'confirmed'""",
-                            {"check_in": new_in, "check_out": new_out, "nights": nights, "guests": int(new_guests),
+                            {"check_in": new_in, "check_out": new_out, "nights": nights, "adults": int(new_adults), "children": int(new_children),
                              "room_id": int(chosen.ro_room_id), "season_id": int(season["se_season_id"]),
                              "amount": float(chosen.total_amount), "id": res_id})
                 ok = cur.rowcount

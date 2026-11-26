@@ -9,7 +9,7 @@ import streamlit as st
 from config import ID_FORMAT, TODAY
 from db import execute_write, query, scalar, transaction
 from rules import age, clean_id_number
-from ui import cop, page_title, table
+from ui import cop_short, page_title, table
 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
           "October", "November", "December"]
@@ -119,7 +119,7 @@ def search_guests():
     k = st.columns(3)
     k[0].metric("Stays", len(valid))
     k[1].metric("Nights", int(valid["nights"].sum()) if len(valid) else 0)
-    k[2].metric("Total spent", cop(valid["amount"].sum() if len(valid) else 0))
+    k[2].metric("Total spent", cop_short(valid["amount"].sum() if len(valid) else 0))
     if len(history):
         table(history, money=["amount"], dates=["check_in", "check_out"], export=f"history_{guest_id}")
     else:
