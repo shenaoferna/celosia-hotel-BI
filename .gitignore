@@ -1,0 +1,22 @@
+# Credentials: never commit these
+.streamlit/secrets.toml
+wallet/
+wallet_*/
+*.sso
+cwallet.*
+ewallet.*
+tnsnames.ora
+sqlnet.ora
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

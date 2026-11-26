@@ -1,254 +1,276 @@
-# Celosía: base de datos y app de un hotel
+# Celosía: Hotel Reservation Database & Management App
 
-> *La brisa entra, el ruido se queda afuera.*
+> *The breeze comes in, the noise stays out.*
 
-Celosía es un hotel boutique **inventado** en Cartagena de Indias. Tiene 23 habitaciones en 7 pisos.
+**🔗 Live app: [YOUR-APP-NAME.streamlit.app](https://YOUR-APP-NAME.streamlit.app)**. If it's asleep, click "Yes, get this app back up" and wait about a minute. Screenshots are below.
 
-Este proyecto tiene dos partes:
+Celosía is a **fictional** 23-room boutique hotel in Cartagena, Colombia. This project takes it from business requirements to a working system:
 
-1. **Una base de datos en Oracle** donde se guardan los huéspedes, las habitaciones, las temporadas y las reservas.
-2. **Una app hecha en Python con Streamlit** para hacer reservas, registrar la llegada y salida de los huéspedes, y analizar cómo le va al hotel.
+1. **Business analysis:** requirements, user stories, process maps and a stakeholder analysis ([`docs/`](docs/)).
+2. **An Oracle database** with a star-schema design for guests, rooms, seasons and reservations.
+3. **A Python + Streamlit app** for the front desk to book rooms, check guests in and out, and analyze hotel performance.
+4. **A machine learning model** that learns from the hotel's own booking history and flags reservations likely to be cancelled, so the front desk can ask for a deposit before it's too late.
 
-Proyecto del curso Introducción a Business Intelligence, EAFIT. Autora: **Sara Henao Fernández**.
+`Business analysis` · `Requirements` · `BPMN` · `SQL` · `Oracle` · `Data modeling` · `Python` · `Streamlit` · `BI` · `Machine learning`
+
+Built for the Introduction to Business Intelligence course at Universidad EAFIT.
 
 ---
 
-## Archivos
+## Screenshots
 
-| Archivo | Qué es |
+| Daily overview and check-in | New reservation |
 |---|---|
-| `DDL_hotel.sql` | Crea las 4 tablas y sus reglas. Se ejecuta primero |
-| `DML_hotel.sql` | Llena las tablas con datos de prueba. Se ejecuta después del DDL |
-| `main.py` | Arranca la app: navegación y manejo general de errores |
-| `config.py` | Datos del hotel, colores y parámetros de negocio |
-| `conexion.py` | Conexión a Oracle en un solo lugar: lecturas, escrituras y mensajes de error |
-| `interfaz.py` | Piezas visuales que comparten las páginas: tablas, gráficos, exportación a Excel |
-| `reglas.py` | Reglas de negocio que revisa la app: edad, formato del documento, check-in y check-out |
-| `paginas/` | Una página de la app por archivo |
-| `requirements.txt` | Librerías de Python necesarias |
-| `README.md` | Este documento |
+| ![Daily overview](images/daily_overview.png) | ![New reservation](images/new_reservation.png) |
 
----
+| Occupancy map | Performance analysis |
+|---|---|
+| ![Occupancy map](images/occupancy_map.png) | ![Performance](images/performance.png) |
 
-## Las tablas
+| Cancellation risk page |
+|---|
+| ![Cancellation risk](images/cancellation_risk.png) |
 
-La base tiene **4 tablas** organizadas en **estrella**:
+## Cancellation risk model
 
-- En el centro está **`reserva`**: cada fila es una habitación reservada por un huésped para una estadía.
-- Alrededor hay tres tablas que describen cada reserva:
-  - **`huesped`**: quién reserva.
-  - **`habitacion`**: qué se reserva.
-  - **`temporada`**: en qué época del año.
+Cancelled bookings leave rooms empty that could have been sold. The app scores every reservation for cancellation risk, using only what is known at booking time:
+- days of lead time
+- sales channel
+- nights and number of guests
+- nightly rate and season surcharge
+- room type, and arrival day and month
+- the guest's age, country, and past stays and cancellations
 
-Un huésped, una habitación o una temporada pueden aparecer en **muchas** reservas, pero cada reserva tiene **solo uno** de cada uno. Por eso las relaciones son **1 a N**.
+**Where it shows up**
+- **New reservation:** before confirming, the agent sees the risk level and what to do. For example: *"High risk: ask for a deposit and confirm a week before arrival."*
+- **Cancellation risk page:** every upcoming reservation, ranked by risk, with the revenue that could be lost, an Excel export, and a tab explaining how the model works.
+
+**How it was built**
+- It's a Random Forest retrained every hour from the database (Python and scikit-learn).
+- **It's validated over time, not with a random split.** It was trained on the oldest 75% of bookings and tested on the newest 25%, the way it would be used in real life.
+- The high, medium and low cutoffs come from cross-validated predictions, so the cancellation rate shown for each level is real, not optimistic.
+
+| Result on the newest 25% of bookings | |
+|---|---|
+| AUC | 0.71 |
+| Average cancellation rate | 10% |
+| Cancellation rate in the "high risk" group (top 20% of scores) | **21%**, 2.1 times the average |
+| Share of all cancellations caught by the "high risk" group | 42% |
+
+The strongest signals are the **sales channel** (Booking.com cancels most and walk-ins never cancel), **lead time**, and the **guest's past cancellations**.
+
+> The test data is synthetic, so these numbers show the method, not a real hotel. The same approach on real hotel data (my [cancellation prediction project](https://github.com/YOUR-USERNAME/hotel-booking-cancellation-prediction)) reached an AUC of 0.91.
+
+## Business analysis documents
+
+| Document | What it covers |
+|---|---|
+| [Business Requirements Document](docs/01-business-requirements.md) | Problem, objectives, scope, business rules, functional and non-functional requirements |
+| [User stories](docs/02-user-stories.md) | 16 user stories with acceptance criteria, grouped by epic, with a traceability matrix |
+| [Process maps](docs/03-process-maps.md) | As-is and to-be check-in and booking processes |
+| [Stakeholder analysis](docs/04-stakeholder-analysis.md) | Stakeholders, interests, influence and RACI |
+
+## What the app does
+
+**Front desk**
+- **Today:** see the hotel's status floor by floor on any date, and check today's guests in and out.
+- **New reservation:** find the guest, search by dates and guests, and choose from cards showing only the rooms that are available, with the calculated price.
+- **Reservations:** search, cancel or modify reservations, and rate completed stays.
+- **Guests:** register new guests, view their history, and delete guests who have no reservations.
+
+**Hotel**
+- **Occupancy map:** see which rooms are occupied on each day of the month.
+- **Rooms:** put a room into maintenance or reactivate it.
+- **Seasons:** create seasons and delete seasons that have no reservations.
+
+**Cancellation risk**
+- **When booking:** shows the new reservation's risk level and the recommended action before confirming.
+- **Cancellation risk page:** lists upcoming reservations ranked by risk, shows the revenue at risk, and explains the model.
+
+**Analytics**
+- **Performance:** occupancy, revenue, sales channels, booking lead time, month vs. the same month last year, and arrival and departure times.
+- **Customers:** satisfaction, most frequent guests, cancellations and countries of origin.
+- **SQL queries:** run your own read-only queries.
+
+Every table can be **downloaded to Excel**.
+
+## Data model
+
+The database has **4 tables in a star schema**:
+- **`reservation`** is the fact table. Each row is one room booked by one guest for one stay.
+- **`guest`**, **`room`** and **`season`** are the dimensions.
+
+All relationships are one-to-many.
 
 ```mermaid
 erDiagram
-    HUESPED ||--o{ RESERVA : "hace"
-    HABITACION ||--o{ RESERVA : "se reserva en"
-    TEMPORADA ||--o{ RESERVA : "clasifica"
+    GUEST ||--o{ RESERVATION : "makes"
+    ROOM ||--o{ RESERVATION : "is booked in"
+    SEASON ||--o{ RESERVATION : "classifies"
 
-    HUESPED {
-        NUMBER hd_id_huesped PK
-        VARCHAR2 hd_nombre
-        VARCHAR2 hd_tipo_documento
-        VARCHAR2 hd_documento
-        DATE hd_fecha_nacimiento
-        VARCHAR2 hd_email
-        VARCHAR2 hd_telefono
-        VARCHAR2 hd_pais
+    GUEST {
+        NUMBER gu_guest_id PK
+        VARCHAR2 gu_name
+        VARCHAR2 gu_id_type
+        VARCHAR2 gu_id_number
+        DATE gu_birth_date
+        VARCHAR2 gu_email
+        VARCHAR2 gu_phone
+        VARCHAR2 gu_country
     }
-    HABITACION {
-        NUMBER ha_id_habitacion PK
-        VARCHAR2 ha_numero
-        VARCHAR2 ha_tipo
-        NUMBER ha_capacidad
-        NUMBER ha_piso
-        NUMBER ha_precio_noche
-        VARCHAR2 ha_estado
+    ROOM {
+        NUMBER ro_room_id PK
+        VARCHAR2 ro_number
+        VARCHAR2 ro_type
+        NUMBER ro_capacity
+        NUMBER ro_floor
+        NUMBER ro_nightly_rate
+        VARCHAR2 ro_status
     }
-    TEMPORADA {
-        NUMBER tp_id_temporada PK
-        VARCHAR2 tp_nombre
-        DATE tp_fecha_inicio
-        DATE tp_fecha_fin
-        NUMBER tp_recargo
+    SEASON {
+        NUMBER se_season_id PK
+        VARCHAR2 se_name
+        DATE se_start_date
+        DATE se_end_date
+        NUMBER se_surcharge
     }
-    RESERVA {
-        NUMBER re_id_reserva PK
-        NUMBER re_id_huesped FK
-        NUMBER re_id_habitacion FK
-        NUMBER re_id_temporada FK
-        DATE re_fecha_reserva
-        DATE re_fecha_entrada
-        DATE re_fecha_salida
-        NUMBER re_noches
-        NUMBER re_num_personas
-        NUMBER re_valor_total
-        VARCHAR2 re_estado
-        VARCHAR2 re_canal
-        NUMBER re_calificacion
-        DATE re_hora_checkin
-        DATE re_hora_checkout
+    RESERVATION {
+        NUMBER re_reservation_id PK
+        NUMBER re_guest_id FK
+        NUMBER re_room_id FK
+        NUMBER re_season_id FK
+        DATE re_booking_date
+        DATE re_check_in_date
+        DATE re_check_out_date
+        NUMBER re_nights
+        NUMBER re_guests
+        NUMBER re_total_amount
+        VARCHAR2 re_status
+        VARCHAR2 re_channel
+        NUMBER re_rating
+        DATE re_check_in_time
+        DATE re_check_out_time
     }
 ```
 
----
+### Normalization
 
-## Normalización
+The tables are in **third normal form (3NF)**, with three deliberate exceptions in the fact table:
 
-### ¿Qué es normalizar?
+- **1NF:** each cell holds a single value, and each reservation is exactly one room. If a family books two rooms, that's two rows.
+- **2NF:** every primary key is a single column, so no attribute can depend on only part of a key.
+- **3NF:** the nightly price belongs to each room, not to the room type (suites 402 and 602 have different prices). The surcharge belongs to the season, and the country belongs to the guest. None of these are repeated in `reservation`.
+- **Not stored because they can be calculated:**
+  - A guest's age is calculated from their date of birth.
+  - Whether a room is free depends on the date, so it's calculated from reservations. `ro_status` only says whether the room is in service.
 
-Normalizar es organizar las tablas para que **cada dato se guarde en un solo lugar**. Así, si un dato cambia, solo hay que corregirlo una vez, y la base nunca dice dos cosas distintas sobre lo mismo.
+**Deliberate exceptions in `reservation`**, which are common practice for a star-schema fact table:
 
-Un ejemplo de lo que se evita: si el precio de la habitación 402 se escribiera en cada una de sus reservas, al subir la tarifa habría que cambiarlo en cientos de filas. Si se olvida alguna, la base tendría dos precios distintos para la misma habitación. Por eso el precio vive **solo** en la tabla `habitacion`.
-
-Hay varios niveles de normalización, llamados **formas normales**. Cada uno agrega una regla al anterior. Las tablas de este proyecto cumplen las tres primeras.
-
-### Primera forma normal (1FN): una sola cosa por casilla
-
-**La regla:** en cada casilla de la tabla va un solo dato, nunca una lista.
-
-**En este proyecto:**
-- Cada huésped tiene **un** teléfono, **un** email y **un** documento. No hay casillas como "300 123 4567, 310 987 6543".
-- Una reserva es **una** habitación. Si una familia toma dos habitaciones, se guardan como dos reservas, en dos filas, y no como "402 y 403" en una misma casilla.
-
-### Segunda forma normal (2FN): cada dato depende de toda la llave
-
-**La regla:** cada dato debe depender de la llave completa de la tabla, y no solo de una parte de ella.
-
-**En este proyecto:** esta regla solo puede romperse cuando la llave de una tabla está formada por **dos o más columnas**. Aquí, todas las llaves son **de una sola columna**: un código para cada huésped, cada habitación, cada temporada y cada reserva. Por eso esta forma se cumple automáticamente.
-
-### Tercera forma normal (3FN): cada dato está en la tabla que le corresponde
-
-**La regla:** un dato debe depender de lo que la tabla describe, y no de otro dato de la misma tabla.
-
-**En este proyecto:**
-- El **precio por noche** está en `habitacion`, porque cada habitación tiene su propio precio: la suite 402 y la suite 602 cuestan distinto.
-- El **recargo** está en `temporada`, porque depende de la época del año.
-- El **país** está en `huesped`, porque es un dato de la persona.
-- La tabla `reserva` **no repite** ninguno de esos datos: solo guarda los códigos que la conectan con el huésped, la habitación y la temporada.
-
-### Lo que no se guarda porque se puede calcular
-
-- **La edad del huésped:** cambia cada año. Se guarda la fecha de nacimiento y la edad se calcula cuando se necesita.
-- **Si una habitación está libre u ocupada:** cambia según la fecha. Se calcula revisando las reservas. La columna `ha_estado` solo dice si la habitación está en servicio o en mantenimiento.
-
-### Tres excepciones hechas a propósito
-
-| Dato | Se podría calcular con | Por qué se guarda de todas formas | Qué evita errores |
+| Column | Could be calculated from | Why it's stored | How consistency is enforced |
 |---|---|---|---|
-| `re_noches` | La fecha de salida menos la de entrada | Se usa en casi todos los análisis, y así no hay que calcularlo cada vez | Una regla de la base exige que coincida con las fechas |
-| `re_valor_total` | Precio × noches × recargo | Es lo que se cobró **en el momento de reservar**. Si mañana sube la tarifa, la reserva debe seguir mostrando lo que realmente se pagó | La app lo calcula al reservar o modificar |
-| `re_id_temporada` | La fecha de entrada | Conecta la reserva con su temporada de forma directa | La app lo asigna según la fecha de entrada |
+| `re_nights` | check-out − check-in | It's the measure almost every analysis uses | A CHECK constraint requires it to match the dates |
+| `re_total_amount` | price × nights × surcharge | It's what was charged at booking time. If rates change later, the reservation keeps its original value | The app calculates it when booking or modifying |
+| `re_season_id` | the check-in date | It joins the reservation to its season with a foreign key, like any dimension | The app assigns it from the check-in date |
 
----
+## Business rules
 
-## Las reglas
+**Enforced by the database (CHECK, UNIQUE and FK constraints)**
+- No two guests can have the same document type and number.
+- A national ID (CC) has only digits. A passport has letters and digits.
+- A room holds 1 to 6 people.
+- Check-out must be after check-in, and the number of nights must match the dates.
+- A stay can only be rated once it has ended.
 
-La base de datos no deja guardar datos que no tengan sentido. Algunos ejemplos:
+**Enforced by the app**, because these rules need another table, other rows or today's date:
+- The guests fit in the room.
+- The room is active and free on those dates.
+- The season matches the check-in date.
+- Total price = nightly price × nights × (1 + season surcharge / 100).
+- The guest making the booking is an adult.
 
-- No se pueden registrar dos huéspedes con el mismo tipo y número de documento.
-- Una cédula solo tiene números; un pasaporte tiene letras y números.
-- Una habitación tiene capacidad para 1 a 6 personas.
-- La fecha de salida debe ser posterior a la de entrada.
-- Las noches deben coincidir con las fechas.
-- Una reserva solo puede tener calificación si ya terminó.
+**Reservation life cycle**
 
-Hay reglas que la base **no puede** revisar sola, porque necesitan mirar otra tabla, otras reservas o la fecha de hoy. Esas las revisa la app antes de guardar:
-
-- Las personas caben en la habitación.
-- La habitación está libre en esas fechas.
-- La temporada corresponde a la fecha de entrada.
-- El valor se calcula así: precio por noche × noches × (1 + recargo de la temporada).
-- El huésped **que reserva** es mayor de edad.
-
-Una reserva pasa por estos estados:
-
+```mermaid
+stateDiagram-v2
+    [*] --> confirmed: booked
+    confirmed --> in_house: check-in
+    in_house --> checked_out: check-out
+    confirmed --> cancelled: cancelled
+    checked_out --> [*]
+    cancelled --> [*]
 ```
-confirmada  →  en_curso (llegó el huésped)  →  finalizada (se fue)
-confirmada  →  cancelada
-```
 
----
+## How the code is built
 
-## Cómo está hecho el código
+- **Modular.** Each file has one job (connection, rules, interface), and each app page lives in its own file in `app_pages/`. File, function and variable names are in English too.
+- **Centralized connection.** Only `db.py` talks to Oracle. It creates a connection pool once, and the rest of the code uses its `query()`, `scalar()` and `execute_write()` functions.
+- **Parameterized queries.** Every value is passed as a bind variable, so the app isn't vulnerable to SQL injection.
+- **Transactions and error handling.**
+  - Every write uses `COMMIT` or `ROLLBACK`.
+  - Oracle errors are translated into clear messages, for example "Can't delete: other reservations depend on this record."
+- **No credentials in the code.** User, passwords and wallet are read from `.streamlit/secrets.toml`, which is excluded with `.gitignore`.
+- **Consistent English naming.** Tables, columns, constraints and stored codes are in English (for example `reservation.re_status = 'in_house'`), with a short prefix per table (`gu_`, `ro_`, `se_`, `re_`) so every column name says where it comes from. The app turns codes into readable labels (`in_house` → "In house") in one place, `config.py`.
+- **Branded interface.** A Colonial palette inspired by Cartagena's walled city: a navy brand bar with a gold lattice pattern, room cards for booking, pill buttons in bougainvillea, and color-coded status and risk badges. It's set in `.streamlit/config.toml` and `ui.py`.
+- **Safe SQL page.** Free queries accept only `SELECT` and run in a read-only transaction.
 
-- **Ordenado por partes.** El código está dividido en archivos, y cada uno se encarga de una sola cosa: uno se conecta a la base, otro guarda las reglas del hotel, otro arma las tablas y los gráficos. Cada página de la app tiene su propio archivo dentro de la carpeta `paginas/`.
+## Test data
 
-- **Una sola puerta a la base de datos.** Solo el archivo `conexion.py` se comunica con Oracle. Las páginas no se conectan por su cuenta: le piden los datos a ese archivo. Así, si algún día cambia la forma de conectarse, se cambia en un solo lugar.
-
-- **Los errores no dañan los datos.** Cada vez que se guarda o se cambia algo, la app lo hace en un solo paso: o se guarda todo, o no se guarda nada. Si algo falla en la mitad, todo vuelve a como estaba. Además, cuando Oracle rechaza una operación, la app muestra un mensaje claro, como *"No se puede eliminar: hay reservas que dependen de este registro"*, en lugar de un error técnico.
-
-- **Las contraseñas no están en el código.** El usuario, las contraseñas y la ubicación del wallet se guardan en un archivo aparte, `.streamlit/secrets.toml`, que no se sube a GitHub.
-
-- **La página de consultas libres solo permite leer.** En Consultas SQL se pueden hacer preguntas a la base con `SELECT`, pero no se puede borrar ni cambiar nada. Los cambios solo se hacen desde las páginas de la app, que revisan las reglas del hotel antes de guardar.
-
----
-
-## Los datos de prueba
-
-| Tabla | Registros |
+| Table | Rows |
 |---|---|
-| huesped | 1.281 |
-| habitacion | 23 |
-| temporada | 14 |
-| reserva | 2.087 |
+| guest | 1,281 |
+| room | 23 |
+| season | 14 |
+| reservation | 2,087 |
 
-Los datos son inventados, pero se comportan como los de un hotel real: hay más ocupación en diciembre y Semana Santa, las suites se venden menos que las habitaciones dobles, las familiares se llenan en vacaciones, hay huéspedes de 19 países, cancelaciones, y llegadas a distintas horas del día. Van de enero de 2025 a febrero de 2027, y los estados de las reservas están calculados al 10 de noviembre de 2026.
+The data is invented but behaves like a real hotel's:
+- Occupancy is higher in December and Easter week.
+- Suites sell less than doubles, and family rooms fill up during school holidays.
+- Guests come from 19 countries, and the data includes cancellations and arrivals at different times of day.
 
----
+It runs from January 2025 to February 2027, with reservation statuses calculated as of November 10, 2026.
 
-## Cómo usarlo
+## Repository structure
 
-### 1. Crear la base de datos
+| File | What it is |
+|---|---|
+| `DDL_hotel.sql` | Creates the 4 tables and their constraints. Run it first |
+| `DML_hotel.sql` | Loads the test data. Run it after the DDL |
+| `main.py` | Starts the app: navigation and general error handling |
+| `config.py` | Hotel identity, color palette and business parameters |
+| `.streamlit/config.toml` | Visual theme (Colonial palette: navy, gold and bougainvillea) |
+| `db.py` | The single Oracle connection: reads, writes and error messages |
+| `ui.py` | Shared visual pieces: tables, charts, Excel export |
+| `rules.py` | Business rules checked by the app: age, document format, check-in and check-out |
+| `risk.py` | Cancellation risk model: features, training, time-based validation and risk levels |
+| `app_pages/` | One app page per file (named `app_pages` because Streamlit reserves `pages/`) |
+| `docs/` | Business analysis documents |
+| `images/` | Screenshots |
+| `requirements.txt` | Python libraries |
 
-1. Crea una base **Oracle Autonomous Database** gratuita (Always Free) y descarga su **wallet**.
-2. Abre SQL Developer y conéctate a la base con el wallet.
-3. Abre `DDL_hotel.sql` y ejecútalo con **F5**. Se crean las 4 tablas.
-4. Abre `DML_hotel.sql` y ejecútalo con **F5**. Se cargan los datos (tarda de 1 a 3 minutos).
+## How to run it
 
-### 2. Correr la app
+### 1. Create the database
+1. Create a free **Oracle Autonomous Database** (Always Free) and download its **wallet**.
+2. Connect to it from SQL Developer using the wallet.
+3. Run `DDL_hotel.sql` with **F5**. This creates the 4 tables.
+4. Run `DML_hotel.sql` with **F5**. This loads the data and takes 1–3 minutes.
 
-1. Instala las librerías en la terminal, desde la carpeta del proyecto:
-   ```
-   pip install -r requirements.txt
-   ```
-   Son: `streamlit`, `oracledb`, `pandas`, `altair` y `openpyxl`.
-2. Descomprime el wallet en una carpeta, por ejemplo `C:/oracle/wallet_hotel/wallet`.
-3. Junto a `main.py`, crea una carpeta llamada `.streamlit` y, dentro, un archivo `secrets.toml` con tus datos:
+### 2. Run the app
+1. Install the libraries: `pip install -r requirements.txt`
+2. Unzip the wallet into a folder, for example `C:/oracle/wallet_hotel/wallet`.
+3. Next to `main.py`, create a `.streamlit` folder, and inside it a `secrets.toml` file:
    ```toml
    [oracle]
    user = "ADMIN"
-   password = "tu_contraseña_de_la_base"
+   password = "your_database_password"
    dsn = "adbhotel_low"
    config_dir = "C:/oracle/wallet_hotel/wallet"
-   wallet_password = "tu_contraseña_del_wallet"
+   wallet_password = "your_wallet_password"
    ```
-   **Este archivo tiene tus contraseñas: no lo subas a GitHub.**
-4. Corre la app:
-   ```
-   streamlit run main.py
-   ```
+   **This file contains your passwords. Never upload it to GitHub.**
+4. Run `streamlit run main.py`
 
 ---
 
-## Qué se puede hacer en la app
-
-**Recepción**
-- **Resumen del día:** ver cómo está el hotel cualquier día, piso por piso, y hacer el **check-in** y el **check-out** de los huéspedes de hoy.
-- **Nueva reserva:** buscar al huésped, elegir fechas y ver solo las habitaciones disponibles. La app calcula el precio.
-- **Reservas:** buscar, cancelar o modificar reservas, y calificar las estadías.
-- **Huéspedes:** registrar huéspedes nuevos, ver su historial y eliminar los que no tienen reservas.
-
-**Hotel**
-- **Mapa de ocupación:** qué habitaciones están ocupadas cada día del mes.
-- **Habitaciones:** pasar una habitación a mantenimiento o volver a activarla.
-- **Temporadas:** crear temporadas nuevas y eliminar las que no tienen reservas.
-
-**Análisis**
-- **Desempeño:** ocupación, ingresos, canales de venta, con cuánta anticipación reservan, cómo va un mes comparado con el año pasado, y a qué hora llegan y salen los huéspedes.
-- **Clientes:** satisfacción, huéspedes más frecuentes, cancelaciones y países de origen.
-- **Consultas SQL:** escribir consultas propias de solo lectura.
-
-Las tablas se pueden **descargar en Excel**.
+**Author:** Sara Henao Fernández · Introduction to Business Intelligence, Universidad EAFIT
+[LinkedIn](https://www.linkedin.com/in/YOUR-PROFILE) · [Portfolio](https://github.com/YOUR-USERNAME)

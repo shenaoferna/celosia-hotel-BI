@@ -1,40 +1,49 @@
-"""Identidad del hotel, paleta de colores y parámetros de negocio."""
+"""Hotel identity, color palette and business parameters."""
 
 import datetime as dt
 
-# Identidad de marca. La celosía es la reja de madera de los balcones coloniales:
-# deja pasar el aire y protege la intimidad.
+# Brand identity. A "celosía" is the wooden lattice on colonial balconies:
+# it lets the breeze in and keeps the room private.
 HOTEL = "Celosía"
-DESCRIPCION_HOTEL = "Hotel boutique en Cartagena de Indias, a cinco minutos de la ciudad amurallada"
-LEMA = "La brisa entra, el ruido se queda afuera."
+HOTEL_DESCRIPTION = "Boutique hotel in Cartagena, Colombia, five minutes from the walled city"
+TAGLINE = "The breeze comes in, the noise stays out."
 
-# Fecha de hoy: se usa en todas las reglas que dependen del día actual
-HOY = dt.date.today()
+# Today's date: used by every rule that depends on the current day
+TODAY = dt.date.today()
 
-# Paleta inspirada en la ciudad amurallada
-TINTA = "#2F3F73"        # añil de las puertas coloniales (color principal)
-LATON = "#B08D57"        # latón de aldabas y herrajes
-SALVIA = "#2F6B5E"       # verde de balcón
-PALISANDRO = "#A23E6E"   # buganvilla
-PIEDRA = "#8C7F6E"       # piedra coralina de la muralla
+# Colonial palette, inspired by the walled city: indigo doors, brass door knockers
+# and bougainvillea on the balconies.
+INDIGO = "#0C447C"         # main color: brand bar, titles, charts
+INDIGO_DARK = "#082F57"    # sidebar
+SKY = "#E6F1FB"            # very light blue: panel and card backgrounds
+BRASS = "#EF9F27"          # gold accents, second chart color
+BRASS_DARK = "#854F0B"     # text on gold backgrounds
+SAGE = "#2E7D5B"           # balcony green: in house, low risk
+BOUGAINVILLEA = "#B83F6C"  # primary buttons, cancellations, high risk
+STONE = "#8C7F6E"          # coral stone of the city wall: neutral data
 
-COLOR_ESTADO = {"confirmada": LATON, "en_curso": SALVIA, "finalizada": TINTA, "cancelada": PALISANDRO}
-ESTADOS = ["confirmada", "en_curso", "finalizada", "cancelada"]
-# Ciclo de vida: confirmada --check-in--> en_curso --check-out--> finalizada ; confirmada --cancelar--> cancelada
+STATUS_COLOR = {"confirmed": BRASS, "in_house": SAGE, "checked_out": INDIGO, "cancelled": BOUGAINVILLEA}
+STATUSES = ["confirmed", "in_house", "checked_out", "cancelled"]
+# Life cycle: confirmed --check-in--> in_house --check-out--> checked_out ; confirmed --cancel--> cancelled
 
-CANALES = {"directo": "Directo (web o teléfono del hotel)", "booking": "Booking / OTA", "agencia": "Agencia de viajes",
-           "walk_in": "Llegó sin reserva (walk-in)"}
+# Codes stored in the database (required by the DDL's CHECK constraints) and the label the app shows
+CHANNELS = {"direct": "Direct (hotel website or phone)", "booking": "Booking.com / OTA", "agency": "Travel agency",
+            "walk_in": "Walk-in (no reservation)"}
+STATUS_LABEL = {"confirmed": "Confirmed", "in_house": "In house", "checked_out": "Checked out",
+                "cancelled": "Cancelled"}
+ROOM_TYPE_LABEL = {"single": "Single", "double": "Double", "suite": "Suite", "family": "Family"}
+CHANNEL_LABEL = {"direct": "Direct", "booking": "Booking.com", "agency": "Travel agency", "walk_in": "Walk-in"}
 
-# Supuestos de negocio (no están en la base): comisión que cobra cada canal sobre el valor de la reserva
-COMISION = {"directo": 0.0, "walk_in": 0.0, "booking": 0.18, "agencia": 0.12}
+# Business assumptions (not stored in the database): commission each channel charges on the reservation amount
+COMMISSION = {"direct": 0.0, "walk_in": 0.0, "booking": 0.18, "agency": 0.12}
 
-# Ingreso realizado = estadías finalizadas o en curso. En cartera = reservas confirmadas que todavía no ocurren.
-NOTA_CARTERA = ("Realizado: estadías finalizadas o en curso. En cartera: reservas confirmadas que todavía "
-                "no ocurren, es decir, dinero esperado.")
+# Earned revenue = completed stays and guests in house. On the books = confirmed reservations still to come.
+REVENUE_NOTE = ("Earned: completed stays and guests in house. On the books: confirmed reservations that "
+                "haven't happened yet, that is, expected revenue.")
 
-# Formato de cada tipo de documento: el mismo que exige el CHECK ck_huesped_formato_doc del DDL
-FORMATO_DOC = {
-    "CC":  (r"^[0-9]{5,10}$",    "Una cédula de ciudadanía tiene solo números, entre 5 y 10 dígitos."),
-    "CE":  (r"^[0-9]{4,7}$",     "Una cédula de extranjería tiene solo números, entre 4 y 7 dígitos."),
-    "PAS": (r"^[A-Z0-9]{6,12}$", "Un pasaporte tiene letras y números, entre 6 y 12 caracteres, sin espacios ni símbolos."),
+# Format of each ID type: the same one the DDL's ck_guest_id_format CHECK enforces
+ID_FORMAT = {
+    "CC":  (r"^[0-9]{5,10}$",    "A national ID (CC) has only digits, between 5 and 10."),
+    "CE":  (r"^[0-9]{4,7}$",     "A foreign resident ID (CE) has only digits, between 4 and 7."),
+    "PAS": (r"^[A-Z0-9]{6,12}$", "A passport has letters and digits, between 6 and 12 characters, with no spaces or symbols."),
 }
