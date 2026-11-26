@@ -52,7 +52,7 @@ def reservations():
     k = st.columns(3)
     k[0].metric("Reservations found", len(df))
     k[1].metric("Nights", int(df["nights"].sum()) if len(df) else 0)
-    k[2].metric("Amount (excluding cancelled)",
+    k[2].metric("Amount, excl. cancelled (COP)",
                 cop_short(df.loc[df["status"] != "cancelled", "amount"].sum() if len(df) else 0))
     if df.empty:
         st.info("No reservations match those filters.")

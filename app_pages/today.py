@@ -116,7 +116,7 @@ def today():
     k[1].metric("Arrivals", len(arriving))
     k[2].metric("Departures", len(leaving))
     k[3].metric("Guests in house", int(in_house["guests"].sum()) if len(in_house) else 0)
-    k[4].metric(f"Revenue {d.year} to {d:%b %d}", cop_short(ytd),
+    k[4].metric(f"Revenue {d.year} to {d:%b %d} (COP)", cop_short(ytd),
                 f"{100 * (ytd - ytd_last_year) / ytd_last_year:+.1f}% vs. {d.year - 1}" if ytd_last_year else None)
 
     # ---------- the building, floor by floor ----------

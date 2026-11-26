@@ -119,7 +119,7 @@ def search_guests():
     k = st.columns(3)
     k[0].metric("Stays", len(valid))
     k[1].metric("Nights", int(valid["nights"].sum()) if len(valid) else 0)
-    k[2].metric("Total spent", cop_short(valid["amount"].sum() if len(valid) else 0))
+    k[2].metric("Total spent (COP)", cop_short(valid["amount"].sum() if len(valid) else 0))
     if len(history):
         table(history, money=["amount"], dates=["check_in", "check_out"], export=f"history_{guest_id}")
     else:

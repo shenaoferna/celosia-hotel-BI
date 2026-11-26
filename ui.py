@@ -240,16 +240,17 @@ def cop(v):
 
 
 def cop_short(v):
-    """Short form for KPI cards, so big amounts aren't cut off: 1234567890 -> 'COP 1.23 B', 25640000 -> 'COP 25.6 M'."""
+    """Short form for KPI cards, so big amounts aren't cut off: 1234567890 -> '$1.23 B', 25640000 -> '$25.6 M'.
+    The card's label says the amount is in COP (Colombian pesos)."""
     try:
         v = float(v)
     except (TypeError, ValueError):
-        return "COP 0"
+        return "$0"
     if abs(v) >= 1e9:
-        return f"COP {v / 1e9:.2f} B"
+        return f"${v / 1e9:.2f} B"
     if abs(v) >= 1e6:
-        return f"COP {v / 1e6:.1f} M"
-    return cop(v)
+        return f"${v / 1e6:.1f} M"
+    return f"${v:,.0f}"
 
 
 def excel_button(df, name):
