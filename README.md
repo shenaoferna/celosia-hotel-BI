@@ -2,7 +2,7 @@
 
 > *The breeze comes in, the noise stays out.*
 
-**🔗 Live app: [YOUR-APP-NAME.streamlit.app](https://YOUR-APP-NAME.streamlit.app)**. If it's asleep, click "Yes, get this app back up" and wait about a minute. Screenshots are below.
+**🔗 Live app: [celosia-hotel.streamlit.app](https://YOUR-APP-NAME.streamlit.app)**. If it's asleep, click "Yes, get this app back up" and wait about a minute. Screenshots are below.
 
 Celosía is a **fictional** 23-room boutique hotel in Cartagena, Colombia. This project takes it from business requirements to a working system:
 
