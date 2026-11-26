@@ -96,7 +96,8 @@ def today():
     leaving = stays[stays["check_out"] == d]
     in_house = stays[(stays["check_in"] <= d) & (stays["check_out"] > d)]
 
-    rooms = query("""SELECT ro_number AS room, ro_floor AS floor, ro_type AS room_type, ro_status AS status
+    rooms = query("""SELECT ro_number AS room, ro_floor AS floor, ro_type AS room_type, ro_status AS status,
+                            ro_back_in_service AS back_in_service
                      FROM room ORDER BY ro_floor DESC, ro_number""")
 
     def occupancy(day):
@@ -137,8 +138,8 @@ def today():
                 css, who, note = "occupied", stay.iloc[0]["guest"], "Occupied"
             elif len(dep):
                 css, who, note = "leaving", dep.iloc[0]["guest"], "Leaving"
-            elif h.status == "maintenance" and d >= TODAY:
-                css, who, note = "maint", "", "Maintenance"
+            elif h.status == "maintenance" and TODAY <= d < pd.to_datetime(h.back_in_service).date():
+                css, who, note = "maint", "", "Maintenance"   # only from today until it's back in service
             else:
                 css, who, note = "", "", ROOM_TYPE_LABEL.get(h.room_type, h.room_type)
             hover = html.escape(f"{h.room} · {ROOM_TYPE_LABEL.get(h.room_type, h.room_type)}" + (f" · {who}" if who else ""))

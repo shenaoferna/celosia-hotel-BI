@@ -75,7 +75,7 @@ See [Stakeholder analysis](04-stakeholder-analysis.md). The main stakeholders ar
 | BR-04 | A reservation is for exactly one room. A group needing several rooms makes several reservations. | Data model |
 | BR-05 | Adults + children can't exceed the room's capacity (1–6), and every reservation has at least one adult | App and database |
 | BR-06 | A room can't have two active reservations with overlapping dates. Cancelled reservations don't block the room. | App |
-| BR-07 | Rooms in maintenance can't be booked | App |
+| BR-07 | A room in maintenance has a back-in-service date. It can't be booked for stays that start before that date, and it returns to active automatically when the date arrives. | Database (CHECK: maintenance requires a date) and app |
 | BR-08 | Check-out must be after check-in, and nights = check-out date − check-in date | Database (CHECK) |
 | BR-09 | Every date belongs to exactly one season. The reservation takes the season of its check-in date. | App |
 | BR-10 | Total price = nightly room price × nights × (1 + season surcharge / 100), fixed at booking time | App |
@@ -98,7 +98,7 @@ See [Stakeholder analysis](04-stakeholder-analysis.md). The main stakeholders ar
 | FR-07 | Cancel a confirmed reservation | Must |
 | FR-08 | Show the day's arrivals and departures and register check-in and check-out with a timestamp | Must |
 | FR-09 | Show an occupancy map of each room for each day of the month | Should |
-| FR-10 | Change a room's status between active and maintenance, warning if it has upcoming reservations | Should |
+| FR-10 | Put a room into maintenance until a back-in-service date, change that date or reactivate the room early, blocking the change if reservations fall inside the maintenance period | Should |
 | FR-11 | Create seasons without overlapping dates, and delete seasons that have no reservations | Must |
 | FR-12 | Record a 1–5 satisfaction rating for completed stays | Should |
 | FR-13 | Show performance analytics: occupancy, realized and expected revenue, channels, booking lead time, year-over-year comparison, arrival and departure times | Should |

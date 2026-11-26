@@ -80,7 +80,7 @@ The strongest signals are the **sales channel** (Booking.com cancels most and wa
 
 **Hotel**
 - **Occupancy map:** see which rooms are occupied on each day of the month.
-- **Rooms:** put a room into maintenance or reactivate it.
+- **Rooms:** put a room into maintenance until a back-in-service date, change that date, or reactivate it early.
 - **Seasons:** create seasons and delete seasons that have no reservations.
 
 **Cancellation risk**
@@ -126,6 +126,7 @@ erDiagram
         NUMBER ro_floor
         NUMBER ro_nightly_rate
         VARCHAR2 ro_status
+        DATE ro_back_in_service
     }
     SEASON {
         NUMBER se_season_id PK
@@ -183,10 +184,11 @@ The tables are in **third normal form (3NF)**, with three deliberate exceptions 
 - A room holds 1 to 6 people, and every reservation has at least 1 adult.
 - Check-out must be after check-in, and the number of nights must match the dates.
 - A stay can only be rated once it has ended.
+- A room in maintenance always has a back-in-service date, and an active room never does.
 
 **Enforced by the app**, because these rules need another table, other rows or today's date:
 - The guests (adults + children) fit in the room.
-- The room is active and free on those dates.
+- The room is free on those dates and not in maintenance (rooms in maintenance are back on sale from their back-in-service date).
 - The season matches the check-in date.
 - Total price = nightly price × nights × (1 + season surcharge / 100).
 - The guest making the booking is an adult.

@@ -9,7 +9,7 @@ import streamlit as st
 from config import CHANNEL_LABEL, CHANNELS, MINORS_RULE, ROOM_TYPE_LABEL, TODAY, party
 from db import query, transaction
 from risk import ACTION, current_model, guest_history, new_booking_row, score
-from rules import age, guest_by_id_number
+from rules import ROOM_OPEN_SQL, age, guest_by_id_number
 from ui import badge, cop, icon, page_title
 
 # How each room type looks on its card: icon, background and icon color
@@ -140,7 +140,7 @@ def new_reservation():
     available = query("""
         SELECT ro.ro_room_id, ro.ro_number, ro.ro_type, ro.ro_capacity, ro.ro_floor, ro.ro_nightly_rate
         FROM room ro
-        WHERE ro.ro_status = 'active'
+        WHERE """ + ROOM_OPEN_SQL + """
           AND ro.ro_capacity >= :guests
           AND NOT EXISTS (SELECT 1 FROM reservation r
                           WHERE r.re_room_id = ro.ro_room_id

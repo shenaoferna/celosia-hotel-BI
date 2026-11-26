@@ -49,13 +49,18 @@ CREATE TABLE room (
     ro_floor         NUMBER(2)     NOT NULL,
     ro_nightly_rate  NUMBER(10,2)  NOT NULL,
     ro_status        VARCHAR2(20)  DEFAULT 'active' NOT NULL,
+    ro_back_in_service DATE,        -- maintenance only: first day the room can be sold again
     CONSTRAINT pk_room PRIMARY KEY (ro_room_id),
     CONSTRAINT uq_room_number UNIQUE (ro_number),
     CONSTRAINT ck_room_type CHECK (ro_type IN ('single','double','suite','family')),
     CONSTRAINT ck_room_capacity CHECK (ro_capacity BETWEEN 1 AND 6),
     CONSTRAINT ck_room_floor CHECK (ro_floor >= 1),
     CONSTRAINT ck_room_rate CHECK (ro_nightly_rate > 0),
-    CONSTRAINT ck_room_status CHECK (ro_status IN ('active','maintenance'))
+    CONSTRAINT ck_room_status CHECK (ro_status IN ('active','maintenance')),
+    -- A room in maintenance must say when it's back in service; an active room has no date
+    CONSTRAINT ck_room_back_in_service CHECK (
+         (ro_status = 'maintenance' AND ro_back_in_service IS NOT NULL)
+      OR (ro_status = 'active' AND ro_back_in_service IS NULL))
 );
 
 CREATE TABLE season (
@@ -118,7 +123,8 @@ CREATE TABLE reservation (
 -- Rules that can't be CHECK constraints (they depend on another table, other rows or today's date)
 -- and that the application validates before saving:
 --   1. re_guests (adults + children) <= ro_capacity of the room.
---   2. The room is 'active' and has no other non-cancelled reservation with overlapping dates.
+--   2. The room isn't in maintenance on those dates (it can be sold again from ro_back_in_service) and has no other
+--      non-cancelled reservation with overlapping dates. Maintenance whose date has passed counts as active.
 --   3. re_season_id matches the season that contains re_check_in_date.
 --   4. re_total_amount = ro_nightly_rate * re_nights * (1 + se_surcharge / 100).
 --   5. The guest is an adult when making the reservation.

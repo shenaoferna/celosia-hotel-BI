@@ -1289,29 +1289,29 @@ INSERT INTO guest (gu_guest_id, gu_name, gu_id_type, gu_id_number, gu_birth_date
 INSERT INTO guest (gu_guest_id, gu_name, gu_id_type, gu_id_number, gu_birth_date, gu_email, gu_phone, gu_country) VALUES (1281, 'Samuel Correa Pérez', 'CC', '1019443468', TO_DATE('1996-04-22','YYYY-MM-DD'), 'samuelperez@gmail.com', '+57 314 230 9638', 'Colombia');
 
 -- DIMENSION: ROOM
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (1, '101', 'single', 1, 1, 150000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (2, '102', 'single', 1, 1, 150000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (3, '103', 'double', 2, 1, 230000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (4, '104', 'double', 2, 1, 230000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (5, '201', 'single', 1, 2, 155000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (6, '202', 'double', 2, 2, 235000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (7, '203', 'double', 2, 2, 235000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (8, '204', 'family', 4, 2, 380000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (9, '301', 'double', 2, 3, 240000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (10, '302', 'double', 2, 3, 240000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (11, '303', 'family', 5, 3, 420000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (12, '304', 'family', 4, 3, 380000, 'maintenance');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (13, '401', 'double', 2, 4, 245000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (14, '402', 'suite', 3, 4, 480000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (15, '403', 'family', 6, 4, 520000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (16, '404', 'double', 2, 4, 245000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (17, '501', 'suite', 2, 5, 520000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (18, '502', 'suite', 3, 5, 550000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (19, '503', 'family', 5, 5, 450000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (20, '504', 'double', 2, 5, 250000, 'maintenance');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (21, '601', 'suite', 2, 6, 650000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (22, '602', 'suite', 3, 6, 680000, 'active');
-INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status) VALUES (23, '701', 'suite', 4, 7, 1250000, 'active');
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (1, '101', 'single', 1, 1, 150000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (2, '102', 'single', 1, 1, 150000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (3, '103', 'double', 2, 1, 230000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (4, '104', 'double', 2, 1, 230000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (5, '201', 'single', 1, 2, 155000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (6, '202', 'double', 2, 2, 235000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (7, '203', 'double', 2, 2, 235000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (8, '204', 'family', 4, 2, 380000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (9, '301', 'double', 2, 3, 240000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (10, '302', 'double', 2, 3, 240000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (11, '303', 'family', 5, 3, 420000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (12, '304', 'family', 4, 3, 380000, 'maintenance', TO_DATE('2026-12-07','YYYY-MM-DD'));
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (13, '401', 'double', 2, 4, 245000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (14, '402', 'suite', 3, 4, 480000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (15, '403', 'family', 6, 4, 520000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (16, '404', 'double', 2, 4, 245000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (17, '501', 'suite', 2, 5, 520000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (18, '502', 'suite', 3, 5, 550000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (19, '503', 'family', 5, 5, 450000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (20, '504', 'double', 2, 5, 250000, 'maintenance', TO_DATE('2026-12-02','YYYY-MM-DD'));
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (21, '601', 'suite', 2, 6, 650000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (22, '602', 'suite', 3, 6, 680000, 'active', NULL);
+INSERT INTO room (ro_room_id, ro_number, ro_type, ro_capacity, ro_floor, ro_nightly_rate, ro_status, ro_back_in_service) VALUES (23, '701', 'suite', 4, 7, 1250000, 'active', NULL);
 
 -- DIMENSION: SEASON
 INSERT INTO season (se_season_id, se_name, se_start_date, se_end_date, se_surcharge) VALUES (1, 'High - January 2025', TO_DATE('2025-01-01','YYYY-MM-DD'), TO_DATE('2025-01-12','YYYY-MM-DD'), 40);

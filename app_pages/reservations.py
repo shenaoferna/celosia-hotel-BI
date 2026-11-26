@@ -8,7 +8,7 @@ import streamlit as st
 
 from config import MINORS_RULE, ROOM_TYPE_LABEL, STATUSES, STATUS_LABEL, TODAY, party
 from db import error_message, execute_write, query, transaction
-from rules import check_in, check_out, clean_id_number
+from rules import ROOM_OPEN_SQL, check_in, check_out, clean_id_number
 from ui import cop, cop_short, page_title, table
 
 
@@ -155,7 +155,7 @@ def change_reservation(res_id, arrival, departure, adults, children, current_roo
     available = query("""
         SELECT ro.ro_room_id, ro.ro_number, ro.ro_type, ro.ro_capacity, ro.ro_nightly_rate
         FROM room ro
-        WHERE ro.ro_status = 'active' AND ro.ro_capacity >= :guests
+        WHERE """ + ROOM_OPEN_SQL + """ AND ro.ro_capacity >= :guests
           AND NOT EXISTS (SELECT 1 FROM reservation r
                           WHERE r.re_room_id = ro.ro_room_id AND r.re_status <> 'cancelled'
                             AND r.re_reservation_id <> :id

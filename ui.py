@@ -195,6 +195,7 @@ _CELL_COLOR = {
 COLUMN_LABELS = {
     "reservation": "Reservation", "guest": "Guest", "id_number": "ID number", "room": "Room", "room_type": "Room type",
     "season": "Season", "check_in": "Arrival", "check_out": "Departure", "nights": "Nights", "guests": "Guests", "adults": "Adults", "children": "Children",
+    "back_in_service": "Back in service",
     "amount": "Amount", "status": "Status", "channel": "Channel", "rating": "Rating", "check_in_time": "Check-in",
     "check_out_time": "Check-out", "capacity": "Capacity", "floor": "Floor", "nightly_rate": "Nightly rate",
     "today": "Today", "start_date": "Start", "end_date": "End", "surcharge": "Surcharge", "country": "Country",

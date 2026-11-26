@@ -23,7 +23,8 @@ def occupancy_map():
     start = dt.date(year, month, 1)
     end = dt.date(year + (month == 12), month % 12 + 1, 1)          # first day of the next month
 
-    rooms = query("SELECT ro_number AS room, ro_type AS room_type, ro_status AS status FROM room ORDER BY ro_number")
+    rooms = query("""SELECT ro_number AS room, ro_type AS room_type, ro_status AS status,
+                            ro_back_in_service AS back_in_service FROM room ORDER BY ro_number""")
     stays = query("""
         SELECT ro.ro_number AS room, r.re_reservation_id AS reservation, g.gu_name AS guest,
                r.re_check_in_date AS check_in, r.re_check_out_date AS check_out
@@ -36,8 +37,12 @@ def occupancy_map():
     days = pd.date_range(start, end - dt.timedelta(days=1)).date
     grid = pd.DataFrame([(room, d) for room in rooms["room"] for d in days], columns=["room", "date"])
     grid["state"], grid["details"] = "free", ""
-    in_maintenance = set(rooms.loc[rooms["status"] == "maintenance", "room"])
-    grid.loc[grid["room"].isin(in_maintenance) & (grid["date"] >= TODAY), "state"] = "maintenance"
+    # Maintenance runs from today until the day before the room is back in service (past dates aren't known)
+    for m in rooms[rooms["status"] == "maintenance"].itertuples():
+        back = pd.to_datetime(m.back_in_service).date()
+        mask = (grid["room"] == m.room) & (grid["date"] >= TODAY) & (grid["date"] < back)
+        grid.loc[mask, "state"] = "maintenance"
+        grid.loc[mask, "details"] = f"Back in service on {back:%b %d, %Y}"
     for r in stays.itertuples():
         arrival, departure = pd.to_datetime(r.check_in).date(), pd.to_datetime(r.check_out).date()
         mask = (grid["room"] == r.room) & (grid["date"] >= arrival) & (grid["date"] < departure)
@@ -56,13 +61,13 @@ def occupancy_map():
     click = alt.selection_point(name="cell", fields=["room", "day"])
     chart = alt.Chart(grid.drop(columns=["date"])).mark_rect(stroke="white", strokeWidth=1).encode(
         x=alt.X("day:O", title=f"{MONTHS[month - 1]} {year}", axis=alt.Axis(labelAngle=0)),
-        y=alt.Y("room:N", title="Room", sort=list(rooms["room"])),
+        y=alt.Y("room:N", title="Room", sort=list(rooms["room"]), axis=alt.Axis(labelOverlap=False, labelFontSize=11)),
         color=alt.Color("state:N", scale=alt.Scale(domain=list(colors), range=list(colors.values())),
                         legend=alt.Legend(title=None, orient="bottom")),
         tooltip=[alt.Tooltip("room", title="Room"), alt.Tooltip("date_text", title="Date"),
                  alt.Tooltip("state", title="Status"), alt.Tooltip("details", title="Details")],
         opacity=alt.condition(click, alt.value(1), alt.value(0.55)),
-    ).add_params(click).properties(height=26 * len(rooms))
+    ).add_params(click).properties(height=28 * len(rooms))
     st.caption("Click an occupied cell to see the reservation.")
     event = st.altair_chart(chart, on_select="rerun", key="map_cells")
     cell = chart_selection(event, "cell")

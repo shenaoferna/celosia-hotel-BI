@@ -10,6 +10,11 @@ from config import TODAY
 from db import error_message, query, transaction
 
 
+# A room can be sold for a stay if it's active, or if its maintenance ends on or before the check-in date.
+# Use it in a query that has the room as "ro" and a :check_in bind variable.
+ROOM_OPEN_SQL = "(ro.ro_status = 'active' OR ro.ro_back_in_service <= :check_in)"
+
+
 def age(birth_date, ref=TODAY):
     return ref.year - birth_date.year - ((ref.month, ref.day) < (birth_date.month, birth_date.day))
 

@@ -44,7 +44,7 @@ The stories are grouped into six epics. Acceptance criteria use the Given / When
 **As a** front-desk agent, **I want to** see only the rooms that are free and big enough for the chosen dates and number of guests, **so that** I never offer a room I can't sell.
 
 - **Given** check-in and check-out dates and a number of adults and children, **when** I search, **then** the system lists only active rooms with enough capacity and no overlapping confirmed or in-progress reservation.
-- **Given** a room in maintenance, **when** I search any dates, **then** that room isn't listed.
+- **Given** a room in maintenance until a date, **when** I search for a stay that starts before that date, **then** that room isn't listed. For stays from that date on, it is.
 - **Given** no room fits, **when** I search, **then** the system suggests trying other dates or fewer guests.
 
 *Traces to: FR-03, BR-05, BR-06, BR-07. Priority: Must.*
@@ -111,10 +111,12 @@ The stories are grouped into six epics. Acceptance criteria use the Given / When
 ## Epic 4: Inventory and pricing
 
 ### US-12: Take a room out of service
-**As a** hotel manager, **I want to** put a room into maintenance and reactivate it later, **so that** it isn't sold while it's being repaired.
+**As a** hotel manager, **I want to** put a room into maintenance until a set date, **so that** it isn't sold while it's being repaired but goes back on sale as soon as it's ready.
 
-- **Given** an active room with upcoming reservations, **when** I switch it to maintenance, **then** the system warns me how many reservations are affected before I confirm.
-- **Given** a room in maintenance, **when** an agent searches for availability, **then** the room isn't offered.
+- **Given** an active room, **when** I set it to maintenance, **then** I must choose the date it's back in service.
+- **Given** reservations that fall before that date, **when** I try to set the maintenance, **then** the system tells me how many there are and doesn't allow it until they're moved or I pick an earlier date.
+- **Given** a room in maintenance, **when** the back-in-service date arrives, **then** it returns to active on its own. I can also reactivate it early.
+- **Given** the occupancy map, **when** I look at a room in maintenance, **then** only the days until its back-in-service date are marked as maintenance.
 
 *Traces to: FR-10, BR-07. Priority: Should.*
 
