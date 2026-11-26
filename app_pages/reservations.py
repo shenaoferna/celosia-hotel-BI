@@ -6,7 +6,7 @@ import oracledb
 import pandas as pd
 import streamlit as st
 
-from config import ROOM_TYPE_LABEL, STATUS_LABEL, STATUSES, TODAY
+from config import ROOM_TYPE_LABEL, STATUSES, STATUS_LABEL, TODAY
 from db import error_message, execute_write, query, transaction
 from rules import check_in, check_out, clean_id_number
 from ui import cop, page_title, table

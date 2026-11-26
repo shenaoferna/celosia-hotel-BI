@@ -6,7 +6,7 @@ import oracledb
 import pandas as pd
 import streamlit as st
 
-from config import CHANNEL_LABEL, CHANNELS, ROOM_TYPE_LABEL, TODAY
+from config import CHANNELS, CHANNEL_LABEL, ROOM_TYPE_LABEL, TODAY
 from db import query, transaction
 from risk import ACTION, current_model, guest_history, new_booking_row, score
 from rules import age, guest_by_id_number
@@ -14,10 +14,10 @@ from ui import badge, cop, icon, page_title
 
 # How each room type looks on its card: icon, background and icon color
 ROOM_TYPE_STYLE = {
-    "single": ("single_bed", "#E6F1FB", "#0C447C"),
-    "double": ("bed", "#E6F1FB", "#0C447C"),
-    "suite": ("king_bed", "#FAEEDA", "#854F0B"),
-    "family": ("family_restroom", "#FBEAF0", "#993556"),
+    "single": ("single_bed", "#F3EEE3", "#1C1C1C"),
+    "double": ("bed", "#F3EEE3", "#1C1C1C"),
+    "suite": ("king_bed", "#F3EBD8", "#5E4615"),
+    "family": ("family_restroom", "#E4EADF", "#3D5439"),
 }
 CARDS_PER_ROW = 3
 
@@ -56,7 +56,7 @@ def choose(room_id):
 
 def room_card(r, nights, chosen):
     """One available room as a card: 'photo' with an icon, details, price and button."""
-    symbol, background, color = ROOM_TYPE_STYLE.get(r.ro_type, ("hotel", "#E6F1FB", "#0C447C"))
+    symbol, background, color = ROOM_TYPE_STYLE.get(r.ro_type, ("hotel", "#F3EEE3", "#1C1C1C"))
     room_id = int(r.ro_room_id)
     key = f"chosen_{room_id}" if chosen else f"room_card_{room_id}"
     html = (f'<div class="photo" style="background:{background}">{icon(symbol, 52, color)}</div>'

@@ -2,7 +2,7 @@
 
 > *The breeze comes in, the noise stays out.*
 
-**🔗 Live app: [celosia-hotel.streamlit.app](https://celosia-hotel.streamlit.app/)**. If it's asleep, click "Yes, get this app back up" and wait about a minute. Screenshots are below.
+**🔗 Live app: [celosia-hotel.streamlit.app](https://celosia-hotel.streamlit.app)**. If it's asleep, click "Yes, get this app back up" and wait about a minute. Screenshots are below.
 
 Celosía is a **fictional** 23-room boutique hotel in Cartagena, Colombia. This project takes it from business requirements to a working system:
 
@@ -59,7 +59,7 @@ Cancelled bookings leave rooms empty that could have been sold. The app scores e
 
 The strongest signals are the **sales channel** (Booking.com cancels most and walk-ins never cancel), **lead time**, and the **guest's past cancellations**.
 
-> The test data is synthetic, so these numbers show the method, not a real hotel. The same approach on real hotel data (my [cancellation prediction project](https://github.com/YOUR-USERNAME/hotel-booking-cancellation-prediction)) reached an AUC of 0.91.
+> The test data is synthetic, so these numbers show the method, not a real hotel. The same approach on real hotel data (my [cancellation prediction project](https://github.com/shenaoferna/hotel-booking-cancellation-prediction)) reached an AUC of 0.91.
 
 ## Business analysis documents
 
@@ -210,7 +210,7 @@ stateDiagram-v2
   - Oracle errors are translated into clear messages, for example "Can't delete: other reservations depend on this record."
 - **No credentials in the code.** User, passwords and wallet are read from `.streamlit/secrets.toml`, which is excluded with `.gitignore`.
 - **Consistent English naming.** Tables, columns, constraints and stored codes are in English (for example `reservation.re_status = 'in_house'`), with a short prefix per table (`gu_`, `ro_`, `se_`, `re_`) so every column name says where it comes from. The app turns codes into readable labels (`in_house` → "In house") in one place, `config.py`.
-- **Branded interface.** A Colonial palette inspired by Cartagena's walled city: a navy brand bar with a gold lattice pattern, room cards for booking, pill buttons in bougainvillea, and color-coded status and risk badges. It's set in `.streamlit/config.toml` and `ui.py`.
+- **Branded interface.** An ink and antique gold palette inspired by classic luxury hotels: a near-black brand bar with a gold lattice pattern (the *celosía*), serif page titles, room cards for booking, gold pill buttons, and color-coded status and risk badges. It's set in `.streamlit/config.toml` and `ui.py`.
 - **Safe SQL page.** Free queries accept only `SELECT` and run in a read-only transaction.
 
 ## Test data
@@ -237,7 +237,7 @@ It runs from January 2025 to February 2027, with reservation statuses calculated
 | `DML_hotel.sql` | Loads the test data. Run it after the DDL |
 | `main.py` | Starts the app: navigation and general error handling |
 | `config.py` | Hotel identity, color palette and business parameters |
-| `.streamlit/config.toml` | Visual theme (Colonial palette: navy, gold and bougainvillea) |
+| `.streamlit/config.toml` | Visual theme (ink and antique gold palette) |
 | `db.py` | The single Oracle connection: reads, writes and error messages |
 | `ui.py` | Shared visual pieces: tables, charts, Excel export |
 | `rules.py` | Business rules checked by the app: age, document format, check-in and check-out |
@@ -291,4 +291,4 @@ It runs from January 2025 to February 2027, with reservation statuses calculated
 ---
 
 **Author:** Sara Henao Fernández · Introduction to Business Intelligence, Universidad EAFIT
-[LinkedIn](https://www.linkedin.com/in/YOUR-PROFILE) · [Portfolio](https://github.com/YOUR-USERNAME)
+[LinkedIn](https://www.linkedin.com/in/YOUR-PROFILE) · [Portfolio](https://github.com/shenaoferna)

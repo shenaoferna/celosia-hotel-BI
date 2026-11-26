@@ -6,13 +6,12 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-from config import (BRASS, CHANNEL_LABEL, HOTEL, HOTEL_DESCRIPTION, INDIGO, ROOM_TYPE_LABEL, STATUS_LABEL, TAGLINE,
-                    TODAY)
+from config import CHANNEL_LABEL, GOLD, HOTEL, HOTEL_DESCRIPTION, INK, ROOM_TYPE_LABEL, STATUS_LABEL, TAGLINE, TODAY
 from db import query, scalar
 
 
 def apply_style():
-    """Colonial palette: indigo brand bar, gold accents and bougainvillea buttons."""
+    """Ink and antique gold palette: ink brand bar, gold accents and gold buttons, serif page titles."""
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Nunito+Sans:wght@400;600;700;800&display=swap');
@@ -21,10 +20,10 @@ def apply_style():
     /* ---------- Base ---------- */
     html, body, .stApp, .stApp p, .stApp label, .stApp input, .stApp textarea, .stApp button, .stApp li {
         font-family: 'Nunito Sans', 'Segoe UI', sans-serif; }
-    .stApp { background: #F4F7FB; }
+    .stApp { background: #FAF8F4; }
     [data-testid="stHeader"] { background: transparent; }
     .block-container { padding-top: 2.2rem; max-width: 1320px; }
-    h1, h2, h3 { color: #0C447C !important; font-family: 'Nunito Sans', sans-serif !important; font-weight: 800 !important;
+    h1, h2, h3 { color: #1C1C1C !important; font-family: 'Nunito Sans', sans-serif !important; font-weight: 800 !important;
                  letter-spacing: -.01em; }
     h2, h3 { font-size: 1.35rem !important; }
     .ms { font-family: 'Material Symbols Rounded'; font-weight: normal; font-style: normal; line-height: 1;
@@ -32,115 +31,116 @@ def apply_style():
 
     /* ---------- Brand bar ---------- */
     .brand { position: relative; overflow: hidden; border-radius: 18px; margin: -0.6rem 0 1.8rem; color: #FFFFFF;
-             background: #0C447C; padding: 26px 32px 24px; border-bottom: 6px solid #EF9F27; }
+             background: #1C1C1C; padding: 26px 32px 24px; border-bottom: 6px solid #916E27; }
     .brand::before { content: ""; position: absolute; top: 0; right: 0; bottom: 0; width: 45%;
-             background-image: repeating-linear-gradient(45deg, rgba(239,159,39,.45) 0 1.5px, transparent 1.5px 16px),
-                               repeating-linear-gradient(-45deg, rgba(239,159,39,.45) 0 1.5px, transparent 1.5px 16px);
+             background-image: repeating-linear-gradient(45deg, rgba(205,187,142,.35) 0 1.5px, transparent 1.5px 16px),
+                               repeating-linear-gradient(-45deg, rgba(205,187,142,.35) 0 1.5px, transparent 1.5px 16px);
              -webkit-mask-image: linear-gradient(to left, #000 30%, transparent);
                      mask-image: linear-gradient(to left, #000 30%, transparent); }
     .brand .content { position: relative; display: flex; justify-content: space-between; align-items: flex-end;
              gap: 24px; flex-wrap: wrap; }
     .brand .name { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 3.4rem;
              line-height: .95; margin: 0; color: #FFFFFF; }
-    .brand .description { margin: 8px 0 0; font-size: .95rem; color: #CFE0F3; }
+    .brand .description { margin: 8px 0 0; font-size: .95rem; color: #D9D4CB; }
     .brand .tagline { margin: 10px 0 0; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic;
-             font-size: 1.3rem; color: #FAC775; }
+             font-size: 1.3rem; color: #CDBB8E; }
     .brand .today { display: flex; gap: 10px; }
     .brand .stat { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); border-radius: 14px;
-             padding: 10px 16px; min-width: 120px; font-size: .8rem; color: #CFE0F3; }
+             padding: 10px 16px; min-width: 120px; font-size: .8rem; color: #D9D4CB; }
     .brand .stat strong { display: block; font-size: 1.7rem; font-weight: 800; color: #FFFFFF; line-height: 1.1; }
     @media (max-width: 640px) { .brand .name { font-size: 2.5rem; } }
 
     /* ---------- Page titles ---------- */
-    .page-title { border-left: 5px solid #EF9F27; padding: 2px 0 2px 16px; margin: 0 0 1.4rem 0; }
-    .page-title h1 { margin: 0; font-size: 2rem; line-height: 1.15; }
-    .page-title p { margin: 4px 0 0; color: #4A5B73; max-width: 75ch; }
+    .page-title { border-left: 5px solid #916E27; padding: 2px 0 2px 16px; margin: 0 0 1.4rem 0; }
+    .page-title h1 { margin: 0; font-size: 2.5rem; line-height: 1.1; font-family: 'Cormorant Garamond', Georgia, serif !important;
+                     font-weight: 600 !important; letter-spacing: 0; }
+    .page-title p { margin: 4px 0 0; color: #6B655C; max-width: 75ch; }
 
     /* ---------- Sidebar ---------- */
-    [data-testid="stSidebar"] { background: #082F57; }
-    [data-testid="stSidebar"] * { color: #DCE8F6; }
+    [data-testid="stSidebar"] { background: #111111; }
+    [data-testid="stSidebar"] * { color: #E6E1D8; }
     [data-testid="stSidebarNav"] a, [data-testid="stSidebarNavLink"] { border-radius: 10px; }
     [data-testid="stSidebarNav"] a:hover, [data-testid="stSidebarNavLink"]:hover { background: rgba(255,255,255,.08); }
     [data-testid="stSidebarNav"] a[aria-current="page"], [data-testid="stSidebarNavLink"][aria-current="page"] {
-        background: rgba(239,159,39,.18); box-shadow: inset 4px 0 0 #EF9F27; }
+        background: rgba(145,110,39,.25); box-shadow: inset 4px 0 0 #916E27; }
     [data-testid="stSidebarNav"] a[aria-current="page"] span, [data-testid="stSidebarNavLink"][aria-current="page"] span {
         color: #FFFFFF; font-weight: 700; }
-    [data-testid="stNavSectionHeader"], [data-testid="stNavSectionHeader"] * { color: #FAC775 !important;
+    [data-testid="stNavSectionHeader"], [data-testid="stNavSectionHeader"] * { color: #CDBB8E !important;
         text-transform: uppercase; letter-spacing: .08em; font-size: .72rem !important; font-weight: 800; }
     .sidebar-brand { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.7rem; font-weight: 600; margin: 0;
                      color: #FFFFFF !important; }
-    .sidebar-text { font-size: .82rem; margin: 2px 0 0; color: #AFC6E2 !important; }
+    .sidebar-text { font-size: .82rem; margin: 2px 0 0; color: #A9A39A !important; }
 
     /* ---------- Buttons ---------- */
     .stButton > button, .stDownloadButton > button, .stFormSubmitButton > button {
-        border-radius: 999px; font-weight: 700; padding: .45rem 1.2rem; border: 1.5px solid #0C447C; color: #0C447C;
+        border-radius: 999px; font-weight: 700; padding: .45rem 1.2rem; border: 1.5px solid #1C1C1C; color: #1C1C1C;
         background: #FFFFFF; }
     .stButton > button:hover, .stDownloadButton > button:hover, .stFormSubmitButton > button:hover {
-        background: #E6F1FB; border-color: #0C447C; color: #0C447C; }
+        background: #F3EEE3; border-color: #1C1C1C; color: #1C1C1C; }
     .stButton > button[kind="primary"], .stFormSubmitButton > button[kind="primary"],
     [data-testid="stBaseButton-primary"], [data-testid="stBaseButton-primaryFormSubmit"] {
-        background: #B83F6C; border-color: #B83F6C; color: #FFFFFF; }
+        background: #916E27; border-color: #916E27; color: #FFFFFF; }
     .stButton > button[kind="primary"]:hover, .stFormSubmitButton > button[kind="primary"]:hover,
     [data-testid="stBaseButton-primary"]:hover, [data-testid="stBaseButton-primaryFormSubmit"]:hover {
-        background: #962F56; border-color: #962F56; color: #FFFFFF; }
+        background: #7A5B1E; border-color: #7A5B1E; color: #FFFFFF; }
 
     /* ---------- KPIs (st.metric) as cards ---------- */
-    div[data-testid="stMetric"] { background: #FFFFFF; border: 1px solid #D6E4F5; border-top: 4px solid #EF9F27;
+    div[data-testid="stMetric"] { background: #FFFFFF; border: 1px solid #E7E1D5; border-top: 4px solid #916E27;
         border-radius: 14px; padding: 14px 16px 12px; }
-    div[data-testid="stMetricLabel"] * { color: #4A5B73; font-weight: 700; }
-    div[data-testid="stMetricValue"] { color: #0C447C; font-weight: 800; font-variant-numeric: lining-nums tabular-nums; }
+    div[data-testid="stMetricLabel"] * { color: #6B655C; font-weight: 700; }
+    div[data-testid="stMetricValue"] { color: #1C1C1C; font-weight: 800; font-variant-numeric: lining-nums tabular-nums; }
 
     /* ---------- Tabs ---------- */
-    .stTabs [data-baseweb="tab-list"] { gap: 6px; border-bottom: 2px solid #D6E4F5; }
-    .stTabs [data-baseweb="tab"] { background: #FFFFFF; border: 1px solid #D6E4F5; border-bottom: none;
+    .stTabs [data-baseweb="tab-list"] { gap: 6px; border-bottom: 2px solid #E7E1D5; }
+    .stTabs [data-baseweb="tab"] { background: #FFFFFF; border: 1px solid #E7E1D5; border-bottom: none;
         border-radius: 12px 12px 0 0; padding: 8px 16px; }
-    .stTabs [data-baseweb="tab"][aria-selected="true"] { background: #0C447C; border-color: #0C447C; }
+    .stTabs [data-baseweb="tab"][aria-selected="true"] { background: #1C1C1C; border-color: #1C1C1C; }
     .stTabs [data-baseweb="tab"][aria-selected="true"] p { color: #FFFFFF !important; font-weight: 700; }
-    .stTabs [data-baseweb="tab-highlight"] { background: #EF9F27; height: 3px; }
+    .stTabs [data-baseweb="tab-highlight"] { background: #916E27; height: 3px; }
 
     /* ---------- Panels and cards ---------- */
     [data-testid="stVerticalBlockBorderWrapper"] { background: #FFFFFF; border-radius: 16px; }
-    .st-key-search_box { background: #E6F1FB; border: 1.5px solid #B5D4F4; border-radius: 18px; padding: 18px 18px 6px; }
-    .st-key-confirm_box { background: #FFFFFF; border: 1.5px solid #D6E4F5; border-left: 6px solid #B83F6C;
+    .st-key-search_box { background: #F3EEE3; border: 1.5px solid #DDD3BF; border-radius: 18px; padding: 18px 18px 6px; }
+    .st-key-confirm_box { background: #FFFFFF; border: 1.5px solid #E7E1D5; border-left: 6px solid #916E27;
         border-radius: 16px; padding: 18px; }
-    div[class*="st-key-room_card_"], div[class*="st-key-chosen_"] { background: #FFFFFF; border: 1px solid #D6E4F5;
+    div[class*="st-key-room_card_"], div[class*="st-key-chosen_"] { background: #FFFFFF; border: 1px solid #E7E1D5;
         border-radius: 16px; padding: 0 0 14px; overflow: hidden; transition: box-shadow .15s, transform .15s; }
-    div[class*="st-key-room_card_"]:hover { box-shadow: 0 8px 24px rgba(12,68,124,.14); transform: translateY(-2px); }
+    div[class*="st-key-room_card_"]:hover { box-shadow: 0 8px 24px rgba(28,28,28,.12); transform: translateY(-2px); }
     div[class*="st-key-room_card_"] > div, div[class*="st-key-chosen_"] > div { padding-left: 14px; padding-right: 14px; }
-    div[class*="st-key-chosen_"] { border: 2.5px solid #B83F6C !important; box-shadow: 0 8px 24px rgba(184,63,108,.18); }
+    div[class*="st-key-chosen_"] { border: 2.5px solid #916E27 !important; box-shadow: 0 8px 24px rgba(145,110,39,.20); }
     .photo { margin: 0 -14px 10px; height: 96px; display: flex; align-items: center; justify-content: center; }
     .photo .ms { font-size: 52px; }
-    .room-title { font-size: 1.15rem; font-weight: 800; color: #0C447C; margin: 0; }
-    .room-detail { font-size: .85rem; color: #4A5B73; margin: 2px 0 8px; }
-    .room-price { font-size: 1.35rem; font-weight: 800; color: #0C447C; margin: 6px 0 0; }
-    .room-price small { font-size: .78rem; font-weight: 600; color: #4A5B73; }
+    .room-title { font-size: 1.15rem; font-weight: 800; color: #1C1C1C; margin: 0; }
+    .room-detail { font-size: .85rem; color: #6B655C; margin: 2px 0 8px; }
+    .room-price { font-size: 1.35rem; font-weight: 800; color: #1C1C1C; margin: 6px 0 0; }
+    .room-price small { font-size: .78rem; font-weight: 600; color: #6B655C; }
 
     /* ---------- Status and risk badges ---------- */
     .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .75rem; font-weight: 700; }
-    .b-confirmed { background: #FAEEDA; color: #633806; } .b-in_house { background: #E3F3EC; color: #1E5A40; }
-    .b-checked_out { background: #E6F1FB; color: #0C447C; } .b-cancelled { background: #FBEAF0; color: #72243E; }
-    .b-Low { background: #E3F3EC; color: #1E5A40; } .b-Medium { background: #FAEEDA; color: #633806; }
-    .b-High { background: #FBEAF0; color: #72243E; }
+    .b-confirmed { background: #F3EBD8; color: #5E4615; } .b-in_house { background: #E4EADF; color: #3D5439; }
+    .b-checked_out { background: #ECEAE5; color: #3A3A3A; } .b-cancelled { background: #F2E0E0; color: #7A2828; }
+    .b-Low { background: #E4EADF; color: #3D5439; } .b-Medium { background: #F3EBD8; color: #5E4615; }
+    .b-High { background: #F2E0E0; color: #7A2828; }
 
     /* ---------- Alerts and tables ---------- */
     div[data-testid="stAlert"] { border-radius: 14px; }
-    div[data-testid="stDataFrame"] { border: 1px solid #D6E4F5; border-radius: 12px; overflow: hidden; }
+    div[data-testid="stDataFrame"] { border: 1px solid #E7E1D5; border-radius: 12px; overflow: hidden; }
 
     /* ---------- Floor plan on the Today page ---------- */
     .brand, .cell, .page-title { font-variant-numeric: lining-nums; }
     .building { display: flex; flex-direction: column; gap: 6px; margin: .4rem 0 .6rem; padding: 14px;
-                background: #FFFFFF; border: 1px solid #D6E4F5; border-radius: 16px; }
+                background: #FFFFFF; border: 1px solid #E7E1D5; border-radius: 16px; }
     .floor { display: flex; gap: 6px; align-items: stretch; flex-wrap: wrap; }
-    .floor .n { width: 56px; font-size: .78rem; color: #4A5B73; font-weight: 700; display: flex; align-items: center; }
+    .floor .n { width: 56px; font-size: .78rem; color: #6B655C; font-weight: 700; display: flex; align-items: center; }
     .cell { min-width: 78px; padding: 7px 9px; border-radius: 10px; font-size: .74rem; line-height: 1.25;
-           border: 1px solid #D6E4F5; background: #F4F7FB; color: #1B2A41; }
+           border: 1px solid #E7E1D5; background: #FAF8F4; color: #1C1C1C; }
     .cell b { display: block; font-size: 1.05rem; font-weight: 800; }
-    .cell.occupied { background: #0C447C; color: #fff; border-color: #0C447C; }
-    .cell.arriving { background: #2E7D5B; color: #fff; border-color: #2E7D5B; }
-    .cell.leaving { background: #EF9F27; color: #412402; border-color: #EF9F27; }
-    .cell.maint { background: repeating-linear-gradient(45deg, rgba(184,63,108,.28) 0 6px, #FFFFFF 6px 12px);
-                border-color: #B83F6C; }
-    .legend { font-size: .8rem; color: #4A5B73; display: flex; gap: 14px; flex-wrap: wrap; }
+    .cell.occupied { background: #1C1C1C; color: #fff; border-color: #1C1C1C; }
+    .cell.arriving { background: #4F6B4A; color: #fff; border-color: #4F6B4A; }
+    .cell.leaving { background: #916E27; color: #FFFFFF; border-color: #916E27; }
+    .cell.maint { background: repeating-linear-gradient(45deg, rgba(142,47,47,.25) 0 6px, #FFFFFF 6px 12px);
+                border-color: #8E2F2F; }
+    .legend { font-size: .8rem; color: #6B655C; display: flex; gap: 14px; flex-wrap: wrap; }
     .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 4px; margin-right: 5px; vertical-align: -1px; }
     </style>
     """, unsafe_allow_html=True)
@@ -184,9 +184,9 @@ def badge(text, css_class=None):
 
 # Cell colors for the status and risk columns in tables
 _CELL_COLOR = {
-    "Confirmed": ("#FAEEDA", "#633806"), "In house": ("#E3F3EC", "#1E5A40"),
-    "Checked out": ("#E6F1FB", "#0C447C"), "Cancelled": ("#FBEAF0", "#72243E"),
-    "Low": ("#E3F3EC", "#1E5A40"), "Medium": ("#FAEEDA", "#633806"), "High": ("#FBEAF0", "#72243E"),
+    "Confirmed": ("#F3EBD8", "#5E4615"), "In house": ("#E4EADF", "#3D5439"),
+    "Checked out": ("#ECEAE5", "#3A3A3A"), "Cancelled": ("#F2E0E0", "#7A2828"),
+    "Low": ("#E4EADF", "#3D5439"), "Medium": ("#F3EBD8", "#5E4615"), "High": ("#F2E0E0", "#7A2828"),
 }
 
 # Readable headers for the SQL query aliases
@@ -264,7 +264,7 @@ def table(df, money=(), dates=(), headers=None, times=(), export=None):
         d[c] = d[c].map(cop)
     shown = d.rename(columns=names)
     colored = [names[c] for c in d.columns if c in ("status", "risk")]
-    if colored:      # statuses and risk levels with their color (confirmed in gold, cancelled in bougainvillea...)
+    if colored:      # statuses and risk levels with their color (confirmed in gold, cancelled in crimson...)
         style = shown.style
         paint = getattr(style, "map", None) or style.applymap
         shown = paint(_cell_style, subset=colored).format(precision=0, na_rep="")
@@ -273,7 +273,7 @@ def table(df, money=(), dates=(), headers=None, times=(), export=None):
         excel_button(raw, export)
 
 
-def bar_chart(df, x, y, x_title, y_title, horizontal=False, color=INDIGO):
+def bar_chart(df, x, y, x_title, y_title, horizontal=False, color=INK):
     """Bar chart that keeps the order the query returns (Oracle's ORDER BY)."""
     if horizontal:
         enc = dict(y=alt.Y(f"{x}:N", sort="-x", title=x_title), x=alt.X(f"{y}:Q", title=y_title))
@@ -286,14 +286,14 @@ def bar_chart(df, x, y, x_title, y_title, horizontal=False, color=INDIGO):
 
 
 def revenue_bars(df, x, x_title, horizontal=False, value_title="Revenue (COP millions)"):
-    """Stacked bars with two parts: earned (indigo) and on the books (gold)."""
+    """Stacked bars with two parts: earned (ink) and on the books (gold)."""
     df = label_values(df)
     long = df[[x, "earned", "on_the_books"]].melt(id_vars=x, var_name="part", value_name="amount")
     long["cop_millions"] = (long["amount"].astype(float) / 1e6).round(1)
     long["part"] = long["part"].map({"earned": "Earned", "on_the_books": "On the books"})
     long["order"] = long["part"].map({"Earned": 0, "On the books": 1})
     x_order = list(df[x])
-    color = alt.Color("part:N", scale=alt.Scale(domain=["Earned", "On the books"], range=[INDIGO, BRASS]),
+    color = alt.Color("part:N", scale=alt.Scale(domain=["Earned", "On the books"], range=[INK, GOLD]),
                       legend=alt.Legend(title=None, orient="bottom"))
     if horizontal:
         enc = dict(y=alt.Y(f"{x}:N", sort=x_order, title=x_title),

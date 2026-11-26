@@ -11,18 +11,18 @@ TAGLINE = "The breeze comes in, the noise stays out."
 # Today's date: used by every rule that depends on the current day
 TODAY = dt.date.today()
 
-# Colonial palette, inspired by the walled city: indigo doors, brass door knockers
-# and bougainvillea on the balconies.
-INDIGO = "#0C447C"         # main color: brand bar, titles, charts
-INDIGO_DARK = "#082F57"    # sidebar
-SKY = "#E6F1FB"            # very light blue: panel and card backgrounds
-BRASS = "#EF9F27"          # gold accents, second chart color
-BRASS_DARK = "#854F0B"     # text on gold backgrounds
-SAGE = "#2E7D5B"           # balcony green: in house, low risk
-BOUGAINVILLEA = "#B83F6C"  # primary buttons, cancellations, high risk
-STONE = "#8C7F6E"          # coral stone of the city wall: neutral data
+# Ink and antique gold palette: near-black ink, one antique gold accent and warm ivory,
+# the restrained look of classic luxury hotels.
+INK = "#1C1C1C"            # main color: brand bar, titles, charts
+INK_DARK = "#111111"       # sidebar
+IVORY = "#F3EEE3"          # warm off-white: panel and card backgrounds
+GOLD = "#916E27"           # antique gold: primary buttons, accents, second chart color
+GOLD_DARK = "#5E4615"      # text on gold backgrounds
+OLIVE = "#4F6B4A"          # muted green: in house, low risk
+CRIMSON = "#8E2F2F"        # deep red: cancellations, high risk, rooms in maintenance
+STONE = "#8C7F6E"          # warm gray: neutral data
 
-STATUS_COLOR = {"confirmed": BRASS, "in_house": SAGE, "checked_out": INDIGO, "cancelled": BOUGAINVILLEA}
+STATUS_COLOR = {"confirmed": GOLD, "in_house": OLIVE, "checked_out": INK, "cancelled": CRIMSON}
 STATUSES = ["confirmed", "in_house", "checked_out", "cancelled"]
 # Life cycle: confirmed --check-in--> in_house --check-out--> checked_out ; confirmed --cancel--> cancelled
 

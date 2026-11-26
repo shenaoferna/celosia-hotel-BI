@@ -6,7 +6,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-from config import BOUGAINVILLEA, BRASS, CHANNEL_LABEL, COMMISSION, INDIGO, REVENUE_NOTE, SAGE, STONE, TODAY
+from config import CHANNEL_LABEL, COMMISSION, CRIMSON, GOLD, INK, OLIVE, REVENUE_NOTE, STONE, TODAY
 from db import query, scalar
 from ui import bar_chart, page_title, revenue_bars, table, year_filter
 
@@ -43,7 +43,7 @@ def performance():
         with left:
             bar_chart(df, "season", "occupancy_pct", "Season", "Occupancy (%)")
         with right:
-            bar_chart(df, "season", "revpar", "Season", "RevPAR (COP)", color=BRASS)
+            bar_chart(df, "season", "revpar", "Season", "RevPAR (COP)", color=GOLD)
         table(df[["season", "surcharge", "reservations", "room_nights_sold", "occupancy_pct", "adr", "revpar"]],
               money=["adr", "revpar"], export="occupancy_adr_revpar")
         st.caption("Each stay's nights count toward the season of its check-in date. For seasons that haven't "
@@ -83,7 +83,7 @@ def performance():
             revenue_bars(df, "channel_name", "Channel", horizontal=True, value_title="Net revenue (COP millions)")
         with right:
             bar_chart(df, "channel_name", "cancel_pct", "Channel", "Cancellation rate (%)", horizontal=True,
-                      color=BOUGAINVILLEA)
+                      color=CRIMSON)
         table(df[["channel_name", "reservations", "cancelled", "cancel_pct", "revenue", "commission_pct", "earned",
                   "on_the_books", "net_revenue"]],
               money=["revenue", "earned", "on_the_books", "net_revenue"],
@@ -152,9 +152,9 @@ def performance():
                 df_h["hour"] = df_h["hour"].astype(int).map(lambda h: f"{h:02d}:00")
             left, right = st.columns(2)
             with left:
-                bar_chart(arrivals, "hour", "arrivals", "Check-in time", "Arrivals", color=SAGE)
+                bar_chart(arrivals, "hour", "arrivals", "Check-in time", "Arrivals", color=OLIVE)
             with right:
-                bar_chart(departures, "hour", "departures", "Check-out time", "Departures", color=BRASS)
+                bar_chart(departures, "hour", "departures", "Check-out time", "Departures", color=GOLD)
             st.caption("Useful for planning front-desk staffing and housekeeping.")
 
 
@@ -223,7 +223,7 @@ def booking_pace():
         x=alt.X("days_before:Q", scale=alt.Scale(reverse=True),
                 title="Days before the 1st of the month (negative: within the month)"),
         y=alt.Y("occupancy:Q", title="Occupancy on the books (%)"),
-        color=alt.Color("period:N", scale=alt.Scale(range=[STONE, INDIGO]), legend=alt.Legend(title=None, orient="bottom")),
+        color=alt.Color("period:N", scale=alt.Scale(range=[STONE, INK]), legend=alt.Legend(title=None, orient="bottom")),
         tooltip=[alt.Tooltip("period", title="Month"), alt.Tooltip("days_before", title="Days before"),
                  alt.Tooltip("occupancy", title="Occupancy %"), alt.Tooltip("nights", title="Nights")])
     st.altair_chart(line)

@@ -7,7 +7,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-from config import BRASS, CHANNELS, INDIGO, REVENUE_NOTE, ROOM_TYPE_LABEL, TODAY
+from config import CHANNELS, GOLD, INK, REVENUE_NOTE, ROOM_TYPE_LABEL, TODAY
 from db import query, scalar
 from rules import check_in, check_out, same_day_last_year
 from ui import bar_chart, chart_selection, cop, page_title, table
@@ -141,11 +141,11 @@ def today():
             cells.append(f'<div class="cell {css}" title="{hover}"><b>{h.room}</b>{first_name}</div>')
         floors.append(f'<div class="floor"><span class="n">Floor {floor}</span>{"".join(cells)}</div>')
     st.markdown('<div class="building">' + "".join(floors) + "</div>", unsafe_allow_html=True)
-    st.markdown('<div class="legend"><span><i style="background:#2E7D5B"></i>Arriving</span>'
-                '<span><i style="background:#0C447C"></i>Occupied</span>'
-                '<span><i style="background:#EF9F27"></i>Leaving (room frees up)</span>'
-                '<span><i style="background:#F4F7FB;border:1px solid #D6E4F5"></i>Free</span>'
-                '<span><i style="background:repeating-linear-gradient(45deg,rgba(184,63,108,.6) 0 3px,#fff 3px 6px)"></i>'
+    st.markdown('<div class="legend"><span><i style="background:#4F6B4A"></i>Arriving</span>'
+                '<span><i style="background:#1C1C1C"></i>Occupied</span>'
+                '<span><i style="background:#916E27"></i>Leaving (room frees up)</span>'
+                '<span><i style="background:#FAF8F4;border:1px solid #E7E1D5"></i>Free</span>'
+                '<span><i style="background:repeating-linear-gradient(45deg,rgba(142,47,47,.55) 0 3px,#fff 3px 6px)"></i>'
                 'Maintenance</span></div>', unsafe_allow_html=True)
     st.caption("Hover over a room to see the guest.")
 
@@ -182,7 +182,7 @@ def today():
     chart = alt.Chart(long).mark_bar().encode(
         x=alt.X("month:N", sort=MONTHS_SHORT, title=None, axis=alt.Axis(labelAngle=0)),
         y=alt.Y("cop_millions:Q", stack=True, title="COP millions"),
-        color=alt.Color("part:N", scale=alt.Scale(domain=["Earned", "On the books"], range=[INDIGO, BRASS]),
+        color=alt.Color("part:N", scale=alt.Scale(domain=["Earned", "On the books"], range=[INK, GOLD]),
                         legend=alt.Legend(title=None, orient="bottom")),
         order=alt.Order("order:Q"),
         opacity=alt.condition(click, alt.value(1), alt.value(0.35)),
@@ -218,4 +218,4 @@ def today():
             by_type = detail.groupby("room_type", as_index=False)["revenue"].sum().sort_values("revenue", ascending=False)
             by_type["cop_millions"] = (by_type["revenue"].astype(float) / 1e6).round(1)
             bar_chart(by_type[["room_type", "cop_millions"]], "room_type", "cop_millions", "Room type", "COP millions",
-                      horizontal=True, color=BRASS)
+                      horizontal=True, color=GOLD)

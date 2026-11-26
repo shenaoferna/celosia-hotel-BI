@@ -5,7 +5,7 @@ import datetime as dt
 import pandas as pd
 import streamlit as st
 
-from config import CHANNEL_LABEL, INDIGO, TODAY
+from config import CHANNEL_LABEL, INK, TODAY
 from risk import ACTION, LEVELS, current_model, load_history, score
 from ui import bar_chart, cop, page_title, table
 
@@ -114,7 +114,7 @@ def _how_it_works(info):
     imp = imp[imp["importance"] > 0].head(8).copy()
     imp["importance"] = (imp["importance"] * 100).round(2)
     bar_chart(imp, "feature", "importance", "", "How much worse the model gets if this feature is shuffled (AUC points × 100)",
-              horizontal=True, color=INDIGO)
+              horizontal=True, color=INK)
     st.caption("Permutation importance on the test reservations. Features that don't appear barely help the prediction.")
 
     with st.expander("Model limitations"):

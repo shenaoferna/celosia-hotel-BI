@@ -1,9 +1,9 @@
-# App theme (Colonial palette: navy, gold and bougainvillea).
+# App theme (Ink and antique gold palette).
 # This file DOES go to the repository. Passwords live separately in secrets.toml, which is never committed.
 [theme]
 base = "light"
-primaryColor = "#B83F6C"
-backgroundColor = "#F4F7FB"
-secondaryBackgroundColor = "#E6F1FB"
-textColor = "#1B2A41"
+primaryColor = "#916E27"
+backgroundColor = "#FAF8F4"
+secondaryBackgroundColor = "#F3EEE3"
+textColor = "#1C1C1C"
 font = "sans serif"

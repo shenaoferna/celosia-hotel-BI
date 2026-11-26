@@ -6,7 +6,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-from config import BOUGAINVILLEA, INDIGO, TODAY
+from config import CRIMSON, INK, TODAY
 from db import query
 from ui import chart_selection, page_title, table
 
@@ -52,7 +52,7 @@ def occupancy_map():
     k[1].metric("Occupied room nights", int(occupied))
     k[2].metric("Stays in the month", len(stays))
 
-    colors = {"occupied": INDIGO, "free": "rgba(140,127,110,.18)", "maintenance": BOUGAINVILLEA}
+    colors = {"occupied": INK, "free": "rgba(140,127,110,.18)", "maintenance": CRIMSON}
     click = alt.selection_point(name="cell", fields=["room", "day"])
     chart = alt.Chart(grid.drop(columns=["date"])).mark_rect(stroke="white", strokeWidth=1).encode(
         x=alt.X("day:O", title=f"{MONTHS[month - 1]} {year}", axis=alt.Axis(labelAngle=0)),

@@ -2,7 +2,7 @@
 
 import streamlit as st
 
-from config import BOUGAINVILLEA, BRASS, REVENUE_NOTE, SAGE
+from config import CRIMSON, GOLD, OLIVE, REVENUE_NOTE
 from db import query
 from ui import bar_chart, page_title, revenue_bars, table, year_filter
 
@@ -30,7 +30,7 @@ def customers():
         k[2].metric("Ratings of 1 or 2", int(dist.loc[dist["stars"] <= 2, "reservations"].sum()) if total else 0)
         left, right = st.columns(2)
         with left:
-            bar_chart(df, "room_type", "average", "Room type", "Average rating", color=SAGE)
+            bar_chart(df, "room_type", "average", "Room type", "Average rating", color=OLIVE)
         with right:
             dist["stars"] = dist["stars"].astype(int).astype(str) + " ★"
             bar_chart(dist, "stars", "reservations", "Rating", "Reservations")
@@ -47,7 +47,7 @@ def customers():
             GROUP BY g.gu_guest_id, g.gu_name, g.gu_country
             ORDER BY reservations DESC, nights DESC
             FETCH FIRST :n ROWS ONLY""", {**year, "n": int(top)})
-        bar_chart(df, "guest", "reservations", "Guest", "Reservations", horizontal=True, color=BRASS)
+        bar_chart(df, "guest", "reservations", "Guest", "Reservations", horizontal=True, color=GOLD)
         table(df, money=["spent"], export="repeat_guests")
 
     with t3:
@@ -64,7 +64,7 @@ def customers():
         k[1].metric("Cancelled", cancelled)
         k[2].metric("Cancellation rate", f"{100 * cancelled / total:.1f}%" if total else "—")
         df["cancel_pct"] = (100 * df["cancelled"] / df["total"]).round(1)
-        bar_chart(df, "season", "cancel_pct", "Season", "Cancellation rate (%)", color=BOUGAINVILLEA)
+        bar_chart(df, "season", "cancel_pct", "Season", "Cancellation rate (%)", color=CRIMSON)
         table(df[["season", "cancelled", "total", "cancel_pct"]], export="cancellations")
 
     with t4:
